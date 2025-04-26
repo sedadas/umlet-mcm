@@ -29,6 +29,7 @@ public class Neo4JProperties {
     private Path relativeExportsPath = Path.of("/exports");
     private Path exportsPath = Path.of(databasePath.toString() + relativeExportsPath);
 
+    // TODO: Take this from environment variables
     private String uri = "bolt://localhost:7687";
     private String username = "neo4j";
     private String password = "password";

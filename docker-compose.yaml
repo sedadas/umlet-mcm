@@ -1,0 +1,11 @@
+services:
+  frontend:
+    build: ./mcm-frontend
+    ports:
+      - 8080:8080
+
+  backend:
+    build: ./mcm-backend
+    ports:
+      - 8081:8080
+

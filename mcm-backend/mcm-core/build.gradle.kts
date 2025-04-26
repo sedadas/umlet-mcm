@@ -29,6 +29,7 @@ dependencies {
     implementation(libs.spring.boot.starter.data.neo4j)
     testImplementation(libs.spring.boot.starter.test)
     implementation(libs.gson)
+    implementation("commons-validator:commons-validator:1.9.0")
 
     // These libraries need to be copied to the graphdb plugins directory
     runtimeOnly(files("src\\main\\resources\\graphDB\\plugins\\neo4j-graph-data-science-2.12.0.jar"))

@@ -1,0 +1,121 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "github:NixOS/nixpkgs/nixpkgs-unstable": {
+      "resolved": "github:NixOS/nixpkgs/d19cf9dfc633816a437204555afeb9e722386b76?lastModified=1744316434&narHash=sha256-lzFCg%2F1C39pyY2hMB2gcuHV79ozpOz%2FVu15hdjiFOfI%3D"
+    },
+    "nodejs@20": {
+      "last_modified": "2025-03-16T23:54:35Z",
+      "plugin_version": "0.0.2",
+      "resolved": "github:NixOS/nixpkgs/5d9b5431f967007b3952c057fc92af49a4c5f3b2#nodejs_20",
+      "source": "devbox-search",
+      "version": "20.19.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/4i96rnl7hdzm3k3w36gx7d2p1af3b64q-nodejs-20.19.0",
+              "default": true
+            },
+            {
+              "name": "libv8",
+              "path": "/nix/store/dvr6jyyhygpci5yj5mdl3p0xi2qcm02g-nodejs-20.19.0-libv8"
+            }
+          ],
+          "store_path": "/nix/store/4i96rnl7hdzm3k3w36gx7d2p1af3b64q-nodejs-20.19.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/qz522zmsx441py29xy69sf5671bkhpj2-nodejs-20.19.0",
+              "default": true
+            },
+            {
+              "name": "libv8",
+              "path": "/nix/store/7i02830b2pxlapzav6yyggymqmp6rk02-nodejs-20.19.0-libv8"
+            }
+          ],
+          "store_path": "/nix/store/qz522zmsx441py29xy69sf5671bkhpj2-nodejs-20.19.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/4k73p2z9h5rnfv9gal8n6m4srx5sggs8-nodejs-20.19.0",
+              "default": true
+            },
+            {
+              "name": "libv8",
+              "path": "/nix/store/px89hqr3wcfk0w6146hf4171bvj4chgp-nodejs-20.19.0-libv8"
+            }
+          ],
+          "store_path": "/nix/store/4k73p2z9h5rnfv9gal8n6m4srx5sggs8-nodejs-20.19.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/088a1y8kvrmvi7vm5ff67hg7c4hcnqg7-nodejs-20.19.0",
+              "default": true
+            },
+            {
+              "name": "libv8",
+              "path": "/nix/store/njqqwr5311xmnm05ms3n7b8piwnyq7x1-nodejs-20.19.0-libv8"
+            }
+          ],
+          "store_path": "/nix/store/088a1y8kvrmvi7vm5ff67hg7c4hcnqg7-nodejs-20.19.0"
+        }
+      }
+    },
+    "temurin-bin-21@latest": {
+      "last_modified": "2024-10-13T23:44:06Z",
+      "resolved": "github:NixOS/nixpkgs/d4f247e89f6e10120f911e2e2d2254a050d0f732#temurin-bin-21",
+      "source": "devbox-search",
+      "version": "21.0.3",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/wdbp9cv8i0m2z83wr2q7ppbkhi4djckp-temurin-bin-21.0.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/wdbp9cv8i0m2z83wr2q7ppbkhi4djckp-temurin-bin-21.0.3"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/9njfyb8kz0r3260wgc8scmrlrhzji43d-temurin-bin-21.0.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/9njfyb8kz0r3260wgc8scmrlrhzji43d-temurin-bin-21.0.3"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/nnyaa0aznldmz68zkjx9zihmpngkvbgk-temurin-bin-21.0.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/nnyaa0aznldmz68zkjx9zihmpngkvbgk-temurin-bin-21.0.3"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/kwjvpnrx6npi594r8v78fjkdjqa1dpmm-temurin-bin-21.0.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/kwjvpnrx6npi594r8v78fjkdjqa1dpmm-temurin-bin-21.0.3"
+        }
+      }
+    }
+  }
+}

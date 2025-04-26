@@ -1,59 +1,63 @@
-# UMLet Model Change Management - 2024WS-ASE-PR
-UMLet MCM ("Model Change Management") allows importing diagrams created with the tool [UMLet](https://github.com/umlet/umlet) into a graph database (Neo4J) and to query them via Cypher Query Language. Changes are also automatically versioned in an (internal) git repo.
+# Umlet-MCM - Reloaded
 
-This project was created for a university course at the TU Wien and was shown at the final demo, but otherwise **not been used in production** (as of February 2025).
+This repo is based on a fork of [Umlet-MCM](https://github.com/umlet-mcm/umlet-mcm) at revision [e80602e](https://github.com/umlet-mcm/umlet-mcm/commit/e80602ee04cc11506b28953d132ceea832381ffe).
 
-### Versioning software for models created in UMLet(ino)
-A [30min demo of the application](https://www.youtube.com/watch?v=ic5iJcUQFJA) can be found on YouTube.
+Please refer to the documentation there as well.
 
-The idea of this project is based on the following papers:
-* [Efficient Multi-view Change Management in Agile Production Systems Engineering](http://hdl.handle.net/20.500.12708/142569)
-* [Traceable Multi‑view Model Integration: A Transformation Pipeline for Agile Production Systems Engineering](https://doi.org/10.1007/s42979-022-01572-5)
-* [Multi-Domain Modeling for Change Management in Cyber-Physical Production Systems Engineering](http://hdl.handle.net/20.500.12708/209733)
-* [Product-Process-Resource Asset Networks as Foundation for Improving CPPS Engineering](http://hdl.handle.net/20.500.12708/58358)
+## Requirements
 
-## Features
+You'll need:
 
-- Keep track of model versions
-- Create configurations from multiple models
-- Compare different versions of configurations
-- Merge multiple models into a single model
-- Export configurations, models and subgraphs as UXF and CSV files
-- Run Neo4j queries on the models
+* Linux, MacOS or WSL
+* Java 21 
+* NodeJS 20
+* Docker and Docker Compose
+* GNU make for convenience
+* [devbox](https://www.jetify.com/docs/devbox/installing_devbox/) for even more convenience
 
-## [Building and Running the Application](docs/usage.md)
-This section provides detailed instructions on setting up and running the application.
+If you use devbox, you can start a shell and install Java and NodeJS like this:
 
-## Docs
-This section contains documentation related to the implementation of specific features. It is divided into logical sections for easy navigation. Each section leads to a separate documentation file.
+```
+$ devbox shell
+```
 
-### Attribute Conventions
+## Building the project
 
-The custom attributes stored in the uxf files follow strict conventions. The most up-to-date information is available on [TU Colab](https://colab.tuwien.ac.at/display/SE/How+to+create+properties). 
+TL;DR:
 
-### [Versioning](docs/model_versioning.md)
-Information about the implementation of model versioning.
+```
+$ make
+```
 
-### [UXF Parsing](docs/parser.md)
-Explanation of how UXF files are parsed into Java domain classes.
+To build the prod frontend use a custom target:
 
-### [DSL](docs/dsl.md)
-Documentation about how Java domain classes are transformed into a custom DSL for versioning and storing purposes.
+```
+$ make TARGET=prod
+```
 
-### [Neo4j](docs/neo4j.md)
-Information regarding the Neo4J integration.
+This will build both the backend and the frontend as well as their docker images.
 
-### [Frontend](docs/frontend.md)
-Information about the visual frontend part of the application (including requirements & setup).
+If you wish to build components individually:
 
-> **Note:**
->Additional information can be found on the [TU Colab page](https://colab.tuwien.ac.at/display/SE/24WS+ASE+PR+UMLet+Model+Change+Management) of this project.
 
-## Contributors
+```bash
+$ make backend
+$ make frontend
+$ make docker
+```
 
-- Konrad Fabian Aigner
-- Benjamin Giraud-Renard
-- Lukas Loidolt
-- Théo Hauray
-- Dániel Hajós
-- Andrej Kapusta
+You can also lint if you'd like:
+```bash
+make lint
+```
+
+
+## Running the project
+
+Locally:
+
+```bash
+$ make
+$ make run
+```
+
