@@ -12,6 +12,7 @@ import java.util.List;
 @Component
 @Slf4j
 public class UserEntityMapperImpl implements UserEntityMapper {
+    @Autowired
     private UserRoleEntityMapper userRoleEntityMapper;
 
     @Override

@@ -3,10 +3,11 @@ package at.ac.tuwien.model.change.management.core.service;
 import at.ac.tuwien.model.change.management.core.exception.UserNotFoundException;
 import at.ac.tuwien.model.change.management.core.model.User;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
-public interface UserService {
+public interface UserService extends UserDetailsService {
     /**
      * Get all users in the system
      * @return a list of users

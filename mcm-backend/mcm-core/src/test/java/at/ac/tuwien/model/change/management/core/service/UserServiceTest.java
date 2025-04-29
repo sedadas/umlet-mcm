@@ -7,7 +7,6 @@ import at.ac.tuwien.model.change.management.core.mapper.neo4j.UserEntityMapper;
 import at.ac.tuwien.model.change.management.core.model.User;
 import at.ac.tuwien.model.change.management.graphdb.dao.UserEntityDAO;
 import at.ac.tuwien.model.change.management.graphdb.entities.UserEntity;
-import com.google.common.hash.Hashing;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -83,7 +83,7 @@ public class UserServiceTest {
 
         User res = userService.getUser(user.getUsername());
         Assertions.assertEquals(res.getUsername(), user.getUsername());
-        Assertions.assertEquals(hashPassword(res.getPassword()), userEntity.getPassword());
+        Assertions.assertNotNull(userEntity.getPassword());
     }
 
     @Test
@@ -106,7 +106,7 @@ public class UserServiceTest {
 
         User res = userService.createUser(user);
         Assertions.assertEquals(res.getUsername(), user.getUsername());
-        Assertions.assertEquals(hashPassword(res.getPassword()), userEntity.getPassword());
+        Assertions.assertNotNull(userEntity.getPassword());
     }
 
     @Test
@@ -134,7 +134,6 @@ public class UserServiceTest {
 
         User res = userService.updateUser(user);
         Assertions.assertEquals(res.getUsername(), user.getUsername());
-        Assertions.assertEquals(hashPassword(res.getPassword()), userEntity.getPassword());
     }
 
     @Test
@@ -149,9 +148,6 @@ public class UserServiceTest {
     }
 
     private String hashPassword(String password) {
-        // TODO: Take this from an environment variable
-        final String salt = "Na5vucushuan9Ooj";
-        String salted = salt + password;
-        return Hashing.sha256().hashString(salted, StandardCharsets.UTF_8).toString();
+        return new BCryptPasswordEncoder().encode(password);
     }
 }

@@ -12,9 +12,11 @@ dependencies {
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.validation)
     implementation(libs.spring.boot.starter.actuator)
+    implementation("org.springframework.boot:spring-boot-starter-security")
     testImplementation(libs.spring.boot.starter.test)
     implementation(libs.gson)
     testImplementation(libs.apache.commons.lang3)
+    testImplementation("org.springframework.security:spring-security-test")
 }
 
 tasks.test {

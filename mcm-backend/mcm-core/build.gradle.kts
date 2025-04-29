@@ -28,6 +28,7 @@ dependencies {
     annotationProcessor(libs.mapstruct.processor)
     implementation(libs.spring.boot.starter.data.neo4j)
     testImplementation(libs.spring.boot.starter.test)
+    implementation("org.springframework.boot:spring-boot-starter-security")
     implementation(libs.gson)
     implementation("commons-validator:commons-validator:1.9.0")
 

@@ -6,13 +6,14 @@ import at.ac.tuwien.model.change.management.core.exception.UserValidationExcepti
 import at.ac.tuwien.model.change.management.core.mapper.neo4j.UserEntityMapper;
 import at.ac.tuwien.model.change.management.core.model.User;
 import at.ac.tuwien.model.change.management.graphdb.dao.UserEntityDAO;
-import com.google.common.hash.Hashing;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Slf4j
@@ -44,7 +45,7 @@ public class UserServiceImpl implements UserService {
         }
         validateUser(newUser);
         var userEntity = userEntityMapper.toEntity(newUser);
-        userEntity.setPassword(hashPassword(newUser.getPassword()));
+        userEntity.setPassword(new BCryptPasswordEncoder().encode((newUser.getPassword())));
         return userEntityMapper.fromEntity(userRepository.save(userEntity));
     }
 
@@ -55,7 +56,7 @@ public class UserServiceImpl implements UserService {
         }
         validateUser(newUser);
         var userEntity = userEntityMapper.toEntity(newUser);
-        userEntity.setPassword(hashPassword(newUser.getPassword()));
+        userEntity.setPassword(new BCryptPasswordEncoder().encode((newUser.getPassword())));
         return userEntityMapper.fromEntity(userRepository.save(userEntity));
     }
 
@@ -87,10 +88,8 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private String hashPassword(String password) {
-        // TODO: Take this from an environment variable
-        final String salt = "Na5vucushuan9Ooj";
-        String salted = salt + password;
-        return Hashing.sha256().hashString(salted, StandardCharsets.UTF_8).toString();
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return getUser(username);
     }
 }
