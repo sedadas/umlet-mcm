@@ -3,11 +3,11 @@ services:
     image: ghcr.io/sedadas/mcm-frontend:latest
     build: ./mcm-frontend
     ports:
-      - 8080:8080
+      - 9080:8080
 
   backend:
     image: ghcr.io/sedadas/mcm-backend:latest    
     build: ./mcm-backend
     ports:
-      - 8081:8080
+      - 9081:8080
 
