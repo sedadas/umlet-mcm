@@ -1,10 +1,12 @@
 services:
   frontend:
+    image: mcm-frontend:latest
     build: ./mcm-frontend
     ports:
       - 8080:8080
 
   backend:
+    image: mcm-backend:latest
     build: ./mcm-backend
     ports:
       - 8081:8080
