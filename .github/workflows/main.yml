@@ -20,3 +20,12 @@ jobs:
       run: devbox run -- make test
     - name: Build 
       run: devbox run -- make
+    - name: Docker Login
+      uses: docker/login-action@v3.4.0
+      with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Docker Push
+      run: devbox run -- make push
+       
