@@ -17,11 +17,11 @@ backend:
 docker:
 	COMPOSE_BAKE=true docker compose build
 
+push:
+	docker compose push
+
 run:
 	docker compose up
-
-login:
-	docker login registry.reset.inso-w.at
 
 lint:
 	docker run --rm -v /var/run/docker.sock:/var/run/docker.sock:rw -v $(shell pwd):/tmp/lint:rw oxsecurity/megalinter:v8
