@@ -3,7 +3,7 @@ FRONTEND_DIR:=$(shell pwd)/mcm-frontend
 BACKEND_DIR:=$(shell pwd)/mcm-backend
 all: frontend backend docker
 
-export VITE_API_PORT=8081
+export VITE_API_PORT=9081
 export VITE_NODE_ENV=$(TARGET)
 
 frontend:
