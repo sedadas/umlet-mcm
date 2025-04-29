@@ -1,0 +1,22 @@
+name: UMLet-MCM
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install devbox  
+      uses: jetify-com/devbox-install-action@v0.11.0
+    - name: Install packages
+      run: devbox install
+    - name: Test 
+      run: devbox run -- make test
+    - name: Build 
+      run: devbox run -- make
