@@ -1,6 +1,23 @@
 TARGET:=development
-FRONTEND_DIR:=$(shell pwd)/mcm-frontend
-BACKEND_DIR:=$(shell pwd)/mcm-backend
+
+ifeq ($(OS), Windows_NT)
+	FRONTEND_DIR:="./mcm-frontend"
+else
+	FRONTEND_DIR:=$(shell pwd)/mcm-frontend
+endif
+
+ifeq ($(OS), Windows_NT)
+	BACKEND_DIR:="./mcm-backend"
+else
+	BACKEND_DIR:=$(shell pwd)/mcm-backend
+endif
+
+ifeq ($(OS), Windows_NT)
+	GRADLE_WRAPPER_COMMAND:="./gradlew"
+else
+	GRADLE_WRAPPER_COMMAND:=./gradlew
+endif
+
 all: frontend backend docker
 
 export VITE_API_PORT=9081
@@ -11,8 +28,8 @@ frontend:
 	cd $(FRONTEND_DIR) && npm run build
 
 backend:
-	cd $(BACKEND_DIR) && ./gradlew :mcm-core:assemble 
-	cd $(BACKEND_DIR) && ./gradlew :mcm-server:assemble
+	cd $(BACKEND_DIR) && $(GRADLE_WRAPPER_COMMAND) :mcm-core:assemble
+	cd $(BACKEND_DIR) && $(GRADLE_WRAPPER_COMMAND) :mcm-server:assemble
 
 docker:
 	COMPOSE_BAKE=true docker compose build
