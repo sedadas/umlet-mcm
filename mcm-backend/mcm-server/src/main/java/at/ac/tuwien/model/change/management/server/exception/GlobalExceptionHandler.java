@@ -61,4 +61,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleModelNotFoundException(ModelNotFoundException e, WebRequest request) {
         return defaultHandleExceptionInternal(e, HttpStatus.NOT_FOUND, request);
     }
+
+    @ExceptionHandler(DashboardNotFoundException.class)
+    public ResponseEntity<Object> handleDashboardNotFoundException(DashboardNotFoundException e, WebRequest request) {
+        return defaultHandleExceptionInternal(e, HttpStatus.NOT_FOUND, request);
+    }
+
+    @ExceptionHandler(InvalidDashboardException.class)
+    public ResponseEntity<Object> handleInvalidDashboardException(InvalidDashboardException e, WebRequest request) {
+        return defaultHandleExceptionInternal(e, HttpStatus.BAD_REQUEST, request);
+    }
 }

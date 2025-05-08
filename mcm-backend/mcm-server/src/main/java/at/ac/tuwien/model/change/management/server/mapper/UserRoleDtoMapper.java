@@ -13,4 +13,6 @@ public interface UserRoleDtoMapper {
     UserRole fromDto(UserRoleDTO userRoleDTO);
 
     List<UserRoleDTO> toDTOs(List<UserRole> roles);
+
+    List<UserRole> fromDTOs(List<UserRoleDTO> roles);
 }
