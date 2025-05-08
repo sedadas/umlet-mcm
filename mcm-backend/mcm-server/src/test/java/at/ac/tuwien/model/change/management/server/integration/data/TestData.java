@@ -16,6 +16,14 @@ public class TestData {
         );
     }
 
+    public static DashboardDTO invalidDashboardWithNullRoles() {
+        return new DashboardDTO(null, null);
+    }
+
+    public static DashboardDTO invalidDashboardWithEmptyRoles() {
+        return new DashboardDTO(null, List.of());
+    }
+
     public static List<UserRoleDTO> validNonExistingRoles() {
         var roles = new ArrayList<UserRoleDTO>();
 

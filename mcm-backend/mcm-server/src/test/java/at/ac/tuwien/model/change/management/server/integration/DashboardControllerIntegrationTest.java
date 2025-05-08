@@ -5,6 +5,7 @@ import at.ac.tuwien.model.change.management.server.dto.DashboardDTO;
 import at.ac.tuwien.model.change.management.server.dto.UserRoleDTO;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.*;
 import org.neo4j.harness.Neo4j;
 import org.neo4j.harness.Neo4jBuilders;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -24,8 +26,7 @@ import java.util.List;
 
 import static at.ac.tuwien.model.change.management.server.InitializeUsers.ADMIN_PASSWORD;
 import static at.ac.tuwien.model.change.management.server.InitializeUsers.ADMIN_USERNAME;
-import static at.ac.tuwien.model.change.management.server.integration.data.TestData.validDashboardWithoutIdDTO;
-import static at.ac.tuwien.model.change.management.server.integration.data.TestData.validNonExistingRole;
+import static at.ac.tuwien.model.change.management.server.integration.data.TestData.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -68,7 +69,7 @@ class DashboardControllerIntegrationTest {
 
     @Test
     @DisplayName("Creating a new dashboard persists it in the database with correct data.")
-    void testCreateDashboard_persistsNewDashboard() throws Exception {
+    void testCreateDashboard_givenValidDashboard_persistsNewDashboard() throws Exception {
         final var dashboardDto = validDashboardWithoutIdDTO();
 
         try (MappingIterator<DashboardDTO> iterator = createDashboard(dashboardDto)) {
@@ -85,8 +86,28 @@ class DashboardControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("Attempting to create a dashboard with invalid arguments returns 400 Bad Request.")
+    void testCreateDashboard_givenInvalidDashboard_returnsBadRequest() throws Exception {
+        assertEquals(
+            Response.Status.BAD_REQUEST.getStatusCode(),
+            createDashboardResponse(null).getStatus(),
+            "Attempting to create a null dashboard should return 400 Bad Request!"
+        );
+        assertEquals(
+                Response.Status.BAD_REQUEST.getStatusCode(),
+                createDashboardResponse(invalidDashboardWithNullRoles()).getStatus(),
+                "Attempting to create a null dashboard should return 400 Bad Request!"
+        );
+        assertEquals(
+                Response.Status.BAD_REQUEST.getStatusCode(),
+                createDashboardResponse(invalidDashboardWithEmptyRoles()).getStatus(),
+                "Attempting to create a null dashboard should return 400 Bad Request!"
+        );
+    }
+
+    @Test
     @DisplayName("Deleting a dashboard by id removes it from the database.")
-    void testDeleteDashboardById() throws Exception {
+    void testDeleteDashboardById_givenValidId_deletesDashboard() throws Exception {
         //Create a dashboard.
         try (var iterator = createDashboard(validDashboardWithoutIdDTO())) {
             final var id = iterator.next().id();
@@ -105,8 +126,24 @@ class DashboardControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("Attempting to delete a non-existing dashboard returns 404 Not Found.")
+    void testDeleteDashboardById_givenNonExistingDashboard_returnsNotFound() throws Exception {
+        var response = mockMvc.perform(MockMvcRequestBuilders
+                        .delete(DASHBOARD_ENDPOINT + "/" + "aaa")
+                        .header("Authorization", "Basic " + authToken())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse();
+
+        assertEquals(
+                Response.Status.NOT_FOUND.getStatusCode(),
+                response.getStatus(),
+                "Attempting to delete a non-existing dashboard should return 404 Not Found!"
+        );
+    }
+
+    @Test
     @DisplayName("Getting a dashboard by id returns the correct dashboard.")
-    void testGetDashboardById() throws Exception {
+    void testGetDashboardById_givenExistingDashboard_ReturnsDashboard() throws Exception {
 
         //1. Create a few dashboards.
 
@@ -148,8 +185,24 @@ class DashboardControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("Attempting to get a non-existing dashboard returns 404 Not Found.")
+    void testGetDashboardById_givenNonExistingDashboard_returnsNotFound() throws Exception {
+        var response = mockMvc.perform(MockMvcRequestBuilders
+                        .get(DASHBOARD_ENDPOINT + "/" + "aaa")
+                        .header("Authorization", "Basic " + authToken())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse();
+
+        assertEquals(
+                Response.Status.NOT_FOUND.getStatusCode(),
+                response.getStatus(),
+                "Attempting to get a non-existing dashboard should return 404 Not Found!"
+        );
+    }
+
+    @Test
     @DisplayName("Getting dashboards by roles returns correct dashboards.")
-    void testGetDashboardsByRoles() throws Exception {
+    void testGetDashboardsByRoles_givenExistingDashboards_returnsCorrectDashboards() throws Exception {
 
         final var role1 = validNonExistingRole();
         final var role2 = validNonExistingRole();
@@ -204,6 +257,17 @@ class DashboardControllerIntegrationTest {
 
     private static String authToken() {
         return Base64.getEncoder().encodeToString((ADMIN_USERNAME + ":" + ADMIN_PASSWORD).getBytes());
+    }
+
+    private MockHttpServletResponse createDashboardResponse(DashboardDTO dashboardDto) throws Exception {
+        //Helper method that creates a simple dashboard and returns the HTTP response of the endpoint.
+        return mockMvc.perform(MockMvcRequestBuilders
+                        .post(DASHBOARD_ENDPOINT + "/new")
+                        .content(objectMapper.writeValueAsString(dashboardDto))
+                        .header("Authorization", "Basic " + authToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse();
     }
 
     private MappingIterator<DashboardDTO> createDashboard(DashboardDTO dashboardDto) throws Exception {
