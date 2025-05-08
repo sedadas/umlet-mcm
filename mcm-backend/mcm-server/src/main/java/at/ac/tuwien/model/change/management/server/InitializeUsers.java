@@ -17,6 +17,10 @@ import java.util.List;
 @Slf4j
 @Component
 public class InitializeUsers implements ApplicationRunner {
+
+    public static final String ADMIN_USERNAME = "admin@example.com";
+    public static final String ADMIN_PASSWORD = "VerySecurePassword123!";
+
     @Autowired
     private UserService userService;
 
@@ -41,7 +45,7 @@ public class InitializeUsers implements ApplicationRunner {
             }
 
             try {
-                userService.getUser("admin@example.com");
+                userService.getUser(ADMIN_USERNAME);
                 log.info("Admin user found, skipping creation...");
             } catch (UserNotFoundException e) {
                 log.warn("Admin user not found, creating...");
@@ -61,8 +65,8 @@ public class InitializeUsers implements ApplicationRunner {
 
     private User configureDefaultUser(UserRole adminRole) {
         User adminUser = new User();
-        adminUser.setUsername("admin@example.com");
-        adminUser.setPassword("VerySecurePassword123!");
+        adminUser.setUsername(ADMIN_USERNAME);
+        adminUser.setPassword(ADMIN_PASSWORD);
         adminUser.setRoles(List.of(adminRole));
         return adminUser;
     }

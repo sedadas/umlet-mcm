@@ -35,4 +35,13 @@ public class UserRoleEntityMapperImpl implements UserRoleEntityMapper {
         }
         return userRoles;
     }
+
+    @Override
+    public List<UserRoleEntity> toEntities(List<UserRole> userRoleList) {
+        List<UserRoleEntity> entities = new ArrayList<>();
+        for (var role : userRoleList) {
+            entities.add(toEntity(role));
+        }
+        return entities;
+    }
 }

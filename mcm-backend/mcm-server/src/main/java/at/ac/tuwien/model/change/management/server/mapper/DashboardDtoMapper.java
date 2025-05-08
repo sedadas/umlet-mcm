@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {DashboardDtoMapper.class})
+@Mapper(componentModel = "spring", uses = {UserRoleDtoMapper.class})
 public interface DashboardDtoMapper {
     DashboardDTO toDto(Dashboard dashboard);
     Dashboard fromDto(DashboardDTO dashboardDTO);

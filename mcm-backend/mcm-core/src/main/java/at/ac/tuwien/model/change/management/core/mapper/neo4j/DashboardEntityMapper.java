@@ -26,4 +26,11 @@ public interface DashboardEntityMapper {
      * @return list of dashboard objects
      */
     List<Dashboard> fromEntities(List<DashboardEntity> dashboardEntities);
+
+    /**
+     * Converts a dashboard object list to a list of dashboard entities
+     * @param dashboardObjects list of dashboard objects
+     * @return list of dashboard neo4j entities
+     */
+    List<DashboardEntity> toEntities(List<Dashboard> dashboardObjects);
 }
