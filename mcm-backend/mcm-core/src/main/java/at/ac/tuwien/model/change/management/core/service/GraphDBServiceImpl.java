@@ -317,7 +317,7 @@ public class GraphDBServiceImpl implements GraphDBService {
 
     @Override
     public void clearDatabase() {
-        rawNeo4jService.clearDatabase();
+        rawNeo4jService.clearDatabaseIgnoreUsers();
         log.info("Cleared the graph database.");
     }
 }

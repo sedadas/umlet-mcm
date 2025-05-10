@@ -127,10 +127,10 @@ public class GraphDBServiceImplTest {
     }
 
     @Test
-    void clearDatabase_invokesRawNeo4jService() {
+    void clearDatabaseIgnoreUsers_invokesRawNeo4jService() {
         graphDBService.clearDatabase();
 
-        verify(rawNeo4jService, times(1)).clearDatabase();
+        verify(rawNeo4jService, times(1)).clearDatabaseIgnoreUsers();
     }
 
     @Test
@@ -153,7 +153,7 @@ public class GraphDBServiceImplTest {
         assertEquals(expectedResource, result);
         verify(rawNeo4jService, times(1)).getOnlyQuerySubgraph(query);
         verify(uxfService, times(1)).exportModel(any(Model.class));
-        verify(rawNeo4jService, times(1)).clearDatabase();
+        verify(rawNeo4jService, times(1)).clearDatabaseIgnoreUsers();
         verify(configurationEntityDAO, times(1)).save(any(ConfigurationEntity.class));
     }
 
@@ -169,7 +169,7 @@ public class GraphDBServiceImplTest {
         InvalidQueryException exception = assertThrows(InvalidQueryException.class, () -> graphDBService.generateQueryUXF(query));
         assertEquals("Invalid query", exception.getMessage());
         verify(rawNeo4jService, times(1)).getOnlyQuerySubgraph(query);
-        verify(rawNeo4jService, times(1)).clearDatabase();
+        verify(rawNeo4jService, times(1)).clearDatabaseIgnoreUsers();
         verify(configurationEntityDAO, times(1)).save(any(ConfigurationEntity.class));
     }
 }

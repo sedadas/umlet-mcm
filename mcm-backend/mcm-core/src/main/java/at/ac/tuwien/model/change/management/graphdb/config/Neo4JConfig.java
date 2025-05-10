@@ -70,6 +70,7 @@ public class Neo4JConfig {
      */
     @PostConstruct
     public void copyFiles() {
+        log.info("Using path %s".formatted(properties.getDatabasePath().toAbsolutePath()) );
         try {
             /* Copy the resources to the graphDB directory */
             for(val plugin : properties.getPlugins()) {
