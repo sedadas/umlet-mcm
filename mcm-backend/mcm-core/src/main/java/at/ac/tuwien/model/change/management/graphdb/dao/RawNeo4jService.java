@@ -1,7 +1,6 @@
 package at.ac.tuwien.model.change.management.graphdb.dao;
 
 import at.ac.tuwien.model.change.management.graphdb.config.Neo4JProperties;
-import at.ac.tuwien.model.change.management.graphdb.entities.NodeEntity;
 import at.ac.tuwien.model.change.management.graphdb.exceptions.InvalidQueryException;
 import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
@@ -98,6 +97,18 @@ public class RawNeo4jService {
     public void clearDatabase() {
         try (Session session = neo4jDriver.session()) {
             String query = "MATCH (n) DETACH DELETE n";
+            session.run(query);
+        } catch (ClientException e) {
+            throw new InvalidQueryException("Error clearing database! " + e.getMessage());
+        }
+    }
+
+    /**
+     * Clears the Neo4j database, removing everything and detaching all nodes from their relations
+     */
+    public void clearDatabaseIgnoreUsers() {
+        try (Session session = neo4jDriver.session()) {
+            String query = "MATCH (n) WHERE n:!User AND n:!UserRole DETACH DELETE n";
             session.run(query);
         } catch (ClientException e) {
             throw new InvalidQueryException("Error clearing database! " + e.getMessage());

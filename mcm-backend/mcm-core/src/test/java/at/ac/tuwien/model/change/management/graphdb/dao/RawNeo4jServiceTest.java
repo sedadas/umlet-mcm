@@ -166,6 +166,20 @@ class RawNeo4jServiceTest {
     }
 
     @Test
+    void clearDatabaseIgnoreUsersExecutesDeleteQuery() {
+        rawNeo4jService.clearDatabaseIgnoreUsers();
+
+        verify(session).run("MATCH (n) WHERE n:!User AND n:!UserRole DETACH DELETE n");
+    }
+
+    @Test
+    void clearDatabaseIgnoreUsersThrowsInvalidQueryExceptionForClientException() {
+        doThrow(new ClientException("Error clearing database!")).when(session).run(anyString());
+
+        assertThrows(InvalidQueryException.class, () -> rawNeo4jService.clearDatabaseIgnoreUsers());
+    }
+
+    @Test
     void getOnlyQuerySubgraphKeepsSpecifiedNodes() {
         String query = "MATCH (n:Node) RETURN n";
         Value value = mock(Value.class, RETURNS_DEEP_STUBS);

@@ -16,11 +16,12 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class InitializeUsers implements ApplicationRunner {
+public class Initialize implements ApplicationRunner {
 
     public static final String ADMIN_USERNAME = "admin@example.com";
     public static final String ADMIN_PASSWORD = "VerySecurePassword123!";
 
+public class Initialize implements ApplicationRunner {
     @Autowired
     private UserService userService;
 
@@ -29,7 +30,7 @@ public class InitializeUsers implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        String bootstrapEnv = System.getenv("CONEMO_BOOTSTRAP");
+        String bootstrapEnv = System.getenv("MCM_BOOTSTRAP");
         boolean bootstrap = bootstrapEnv == null || bootstrapEnv.isBlank() || (!bootstrapEnv.isBlank() && Boolean.parseBoolean(bootstrapEnv));
 
         if(bootstrap) {
