@@ -37,12 +37,11 @@ class DashboardControllerIntegrationTest extends Neo4jIntegrationTest {
             final DashboardDTO dashboard = iterator.next();
             assertNotNull(dashboard, "Create endpoint did not save the dashboard!");
             assertNotNull(dashboard.id(), "Create endpoint did not return a dashboard with an id!");
-            //TODO: ONCE PERMISSIONS ARE IMPLEMENTED IN UserRoleEntityMapperImpl.java, RESTORE THIS ASSERTION!
-            /*assertArrayEquals(
+            assertArrayEquals(
                     dashboardDto.allowedRoles().toArray(),
                     dashboard.allowedRoles().toArray(),
                     "Create endpoint did not return a dashboard with correct allowed roles!"
-            );*/
+            );
         }
     }
 
@@ -124,23 +123,21 @@ class DashboardControllerIntegrationTest extends Neo4jIntegrationTest {
         try (var iterator = getDashboard(id1)) {
             final var result = iterator.next();
             assertEquals(id1, result.id(), "Getting a dashboard by id did not return the correct dashboard!");
-            //TODO: ONCE PERMISSIONS ARE IMPLEMENTED IN UserRoleEntityMapperImpl.java, RESTORE THIS ASSERTION!
-            /*assertArrayEquals(
+            assertArrayEquals(
                     dashboard1.allowedRoles().toArray(),
                     result.allowedRoles().toArray(),
                     "Getting a dashboard by id did not return the correct dashboard!"
-            );*/
+            );
             assertFalse(iterator.hasNext(), "Only 1 dashboard should be returned!");
         }
         try (var iterator = getDashboard(id2)) {
             final var result = iterator.next();
             assertEquals(id2, result.id(), "Getting a dashboard by id did not return the correct dashboard!");
-            //TODO: ONCE PERMISSIONS ARE IMPLEMENTED IN UserRoleEntityMapperImpl.java, RESTORE THIS ASSERTION!
-            /*assertArrayEquals(
+            assertArrayEquals(
                     dashboard2.allowedRoles().toArray(),
                     result.allowedRoles().toArray(),
                     "Getting a dashboard by id did not return the correct dashboard!"
-            );*/
+            );
             assertFalse(iterator.hasNext(), "Only 1 dashboard should be returned!");
         }
     }

@@ -12,7 +12,7 @@ import java.util.List;
 @EqualsAndHashCode
 public class UserRole implements GrantedAuthority {
     private String name;
-    private List<String> Permissions;
+    private List<String> permissions;
 
     @Override
     public String getAuthority() {

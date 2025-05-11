@@ -15,8 +15,7 @@ public class UserRoleEntityMapperImpl implements UserRoleEntityMapper {
     public UserRoleEntity toEntity(UserRole userRole) {
         UserRoleEntity entity = new UserRoleEntity();
         entity.setName(userRole.getName());
-        entity.setPermissions(new ArrayList<>());
-        //TODO Add list of permissions
+        entity.setPermissions(userRole.getPermissions());
         return entity;
     }
 
@@ -24,6 +23,7 @@ public class UserRoleEntityMapperImpl implements UserRoleEntityMapper {
     public UserRole fromEntity(UserRoleEntity userRoleEntity) {
         UserRole userRole = new UserRole();
         userRole.setName(userRoleEntity.getName());
+        userRole.setPermissions(userRoleEntity.getPermissions());
         return userRole;
     }
 
