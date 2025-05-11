@@ -4,23 +4,12 @@ import at.ac.tuwien.model.change.management.graphdb.dao.DashboardEntityDAO;
 import at.ac.tuwien.model.change.management.server.dto.DashboardDTO;
 import at.ac.tuwien.model.change.management.server.dto.UserRoleDTO;
 import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.*;
-import org.neo4j.harness.Neo4j;
-import org.neo4j.harness.Neo4jBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Base64;
 import java.util.List;
@@ -32,42 +21,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Transactional
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD) //Fixes database lock issues when running all tests via Gradle.
-class DashboardControllerIntegrationTest {
+class DashboardControllerIntegrationTest extends Neo4jIntegrationTest {
 
-    //This test class uses Neo4j Test Harness.
-    //See https://docs.spring.io/spring-data/neo4j/reference/testing/testing-with-spring-boot.html#dataneo4jtest-harness40
-    //Keep in mind that @DataNeo4jTest is not compatible with mock MVC integration tests.
-
-    private static Neo4j embeddedDatabaseServer;
     private static final String DASHBOARD_ENDPOINT = "/api/v1/dashboard";
 
     @Autowired
-    private MockMvc mockMvc;
-    @Autowired
     private DashboardEntityDAO dashboardRepository;
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @AfterAll
-    static void stopNeo4j() {
-        embeddedDatabaseServer.close();
-    }
-
-    @DynamicPropertySource
-    static void neo4jProperties(DynamicPropertyRegistry registry) {
-        embeddedDatabaseServer = Neo4jBuilders.newInProcessBuilder()
-                .withDisabledServer()
-                .build();
-
-        registry.add("spring.neo4j.uri", embeddedDatabaseServer::boltURI);
-        registry.add("spring.neo4j.authentication.username", () -> "neo4j");
-        registry.add("spring.neo4j.authentication.password", () -> null);
-    }
 
     @Test
     @DisplayName("Creating a new dashboard persists it in the database with correct data.")

@@ -1,27 +1,19 @@
 package at.ac.tuwien.model.change.management.server.integration;
 
 import at.ac.tuwien.model.change.management.git.util.PathUtils;
-import at.ac.tuwien.model.change.management.server.dto.ConfigurationDTO;
-import at.ac.tuwien.model.change.management.server.dto.ConfigurationVersionDTO;
-import at.ac.tuwien.model.change.management.server.dto.DiffDTO;
-import at.ac.tuwien.model.change.management.server.dto.ModelDTO;
+import at.ac.tuwien.model.change.management.server.dto.*;
 import at.ac.tuwien.model.change.management.server.testutil.ConfigurationDTOAssert;
 import at.ac.tuwien.model.change.management.server.testutil.DtoGen;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.IOException;
@@ -35,25 +27,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@WithMockUser(username = "admin", password = "pwd", roles = "admin")
-public class ConfigurationControllerIntegrationTest {
+class ConfigurationControllerIntegrationTest extends Neo4jIntegrationTest {
 
     private static final String BASE_URL = "/api/v1/configurations";
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String TEST_CONFIGURATION_NAME = "test-configuration";
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    private final static String TEST_CONFIGURATION_NAME = "test-configuration";
-
-    @TempDir
-    private static Path testDirectory;
+    private static final Path testDirectory = Path.of(INTEGRATION_TEST_TEMP_FOLDER.toString(), "test_config");
 
     @DynamicPropertySource
     private static void setRepositoryPath(DynamicPropertyRegistry registry) {
-        registry.add("app.git.repositories", () -> testDirectory.toString());
+        registry.add("app.git.repositories", testDirectory::toString);
     }
 
     @AfterEach
@@ -62,7 +45,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testGetConfiguration_existingConfiguration_shouldReturnConfigurationDTO() throws Exception {
+    void testGetConfiguration_existingConfiguration_shouldReturnConfigurationDTO() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 2, 5, 0);
         var configurationJson = jsonify(originalConfiguration);
 
@@ -85,13 +68,13 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testGetConfiguration_nonExistingConfiguration_shouldReturnNotFound() throws Exception {
+    void testGetConfiguration_nonExistingConfiguration_shouldReturnNotFound() throws Exception {
         mockMvc.perform(get(BASE_URL + "/non-existing"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    public void testGetAllConfigurations_noExistingConfigurations_shouldReturnEmptyList() throws Exception {
+    void testGetAllConfigurations_noExistingConfigurations_shouldReturnEmptyList() throws Exception {
         var result = mockMvc.perform(get(BASE_URL))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -101,7 +84,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testGetAllConfigurations_twoExistingConfigurations_shouldReturnBothConfigurationDTOs() throws Exception {
+    void testGetAllConfigurations_twoExistingConfigurations_shouldReturnBothConfigurationDTOs() throws Exception {
         var originalConfiguration1 = DtoGen.generateRandomizedConfigurationDTO("test1", 2, 5, 0);
         var configurationJson1 = jsonify(originalConfiguration1);
 
@@ -132,7 +115,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testCreateConfiguration_emptyConfiguration_shouldReturnConfiguration() throws Exception {
+    void testCreateConfiguration_emptyConfiguration_shouldReturnConfiguration() throws Exception {
         var originalConfiguration = new ConfigurationDTO(TEST_CONFIGURATION_NAME, null, null);
         var configurationJson = jsonify(originalConfiguration);
 
@@ -146,7 +129,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testCreateConfiguration_configurationWithNodes_shouldReturnConfiguration() throws Exception {
+    void testCreateConfiguration_configurationWithNodes_shouldReturnConfiguration() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 2, 5, 0);
         var configurationJson = jsonify(originalConfiguration);
 
@@ -164,7 +147,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testCreateConfiguration_configurationAlreadyExists_shouldReturnConflict() throws Exception {
+    void testCreateConfiguration_configurationAlreadyExists_shouldReturnConflict() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 2, 5, 0);
         var configurationJson = jsonify(originalConfiguration);
 
@@ -180,7 +163,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testUpdateConfiguration_configurationWithNodes_shouldReturnUpdatedConfiguration() throws Exception {
+    void testUpdateConfiguration_configurationWithNodes_shouldReturnUpdatedConfiguration() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 2, 5, 0);
         var configurationJson = jsonify(originalConfiguration);
 
@@ -207,7 +190,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testDeleteConfiguration_existingConfiguration_shouldDeleteConfiguration() throws Exception {
+    void testDeleteConfiguration_existingConfiguration_shouldDeleteConfiguration() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 2, 5, 0);
         var configurationJson = jsonify(originalConfiguration);
 
@@ -226,13 +209,13 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testDeleteConfiguration_nonExistingConfiguration_shouldSucceedWithoutException() throws Exception {
+    void testDeleteConfiguration_nonExistingConfiguration_shouldSucceedWithoutException() throws Exception {
         mockMvc.perform(delete(BASE_URL + "/non-existing"))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    public void testGetConfigurationVersion_existingConfiguration_shouldReturnConfigurationDTO() throws Exception {
+    void testGetConfigurationVersion_existingConfiguration_shouldReturnConfigurationDTO() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 2, 5, 0);
         var configurationJson = jsonify(originalConfiguration);
 
@@ -255,13 +238,13 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testGetConfigurationVersion_nonExistingConfiguration_shouldReturnNotFound() throws Exception {
+    void testGetConfigurationVersion_nonExistingConfiguration_shouldReturnNotFound() throws Exception {
         mockMvc.perform(get(BASE_URL + "/non-existing/versions/1.0.0"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    public void testGetConfigurationVersion_configurationWithTwoVersions_shouldReturnOriginalConfigurationOnRequest() throws Exception {
+    void testGetConfigurationVersion_configurationWithTwoVersions_shouldReturnOriginalConfigurationOnRequest() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 1, 2, 0);
         var originalConfigurationJson = jsonify(originalConfiguration);
 
@@ -293,7 +276,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testGetConfigurationVersion_configurationWithTwoVersions_shouldReturnUpdatedConfigurationOnRequest() throws Exception {
+    void testGetConfigurationVersion_configurationWithTwoVersions_shouldReturnUpdatedConfigurationOnRequest() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 1, 2, 0);
         var originalConfigurationJson = jsonify(originalConfiguration);
 
@@ -326,13 +309,13 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testListConfigurationVersions_nonExistingConfiguration_shouldReturnNotFound() throws Exception {
+    void testListConfigurationVersions_nonExistingConfiguration_shouldReturnNotFound() throws Exception {
         mockMvc.perform(get(BASE_URL + "/" + TEST_CONFIGURATION_NAME + "/versions"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    public void testListConfigurationVersions_existingConfigurationWithVersion_shouldReturnVersion() throws Exception {
+    void testListConfigurationVersions_existingConfigurationWithVersion_shouldReturnVersion() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 0, 0, 0);
         var configurationJson = jsonify(originalConfiguration);
 
@@ -354,7 +337,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testListConfigurationVersions_existingConfigurationWithTwoVersions_shouldReturnVersions() throws Exception {
+    void testListConfigurationVersions_existingConfigurationWithTwoVersions_shouldReturnVersions() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 0, 0, 0);
         var originalConfigurationJson = jsonify(originalConfiguration);
 
@@ -390,7 +373,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testCompareConfigurationVersions_sameVersion_includeUnchangedFalse_shouldReturnEmptyList() throws Exception {
+    void testCompareConfigurationVersions_sameVersion_includeUnchangedFalse_shouldReturnEmptyList() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 1, 2, 0);
         var originalConfigurationJson = jsonify(originalConfiguration);
 
@@ -410,7 +393,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testCompareConfigurationVersions_sameVersion_includeUnchangedTrue_shouldReturnUnchangedDiffs() throws Exception {
+    void testCompareConfigurationVersions_sameVersion_includeUnchangedTrue_shouldReturnUnchangedDiffs() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 1, 2, 0);
         var originalConfigurationJson = jsonify(originalConfiguration);
 
@@ -431,7 +414,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testCompareConfigurationVersions_addedElements_shouldReturnAddedDiffs() throws Exception {
+    void testCompareConfigurationVersions_addedElements_shouldReturnAddedDiffs() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 0, 0, 0);
         var originalConfigurationJson = jsonify(originalConfiguration);
 
@@ -464,7 +447,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testCompareConfiguration_modifiedElements_shouldReturnModifiedDiffs() throws Exception {
+    void testCompareConfiguration_modifiedElements_shouldReturnModifiedDiffs() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 5, 0, 0);
         var originalConfigurationJson = jsonify(originalConfiguration);
 
@@ -510,7 +493,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testCompareConfiguration_removedElements_shouldReturnDeleteDiffs() throws Exception {
+    void testCompareConfiguration_removedElements_shouldReturnDeleteDiffs() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 2, 3, 0);
         var originalConfigurationJson = jsonify(originalConfiguration);
 
@@ -545,13 +528,13 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testCheckoutConfiguration_nonExistingConfiguration_shouldReturnNotFound() throws Exception {
+    void testCheckoutConfiguration_nonExistingConfiguration_shouldReturnNotFound() throws Exception {
         mockMvc.perform(post(BASE_URL + "/non-existing/versions/1.0.0/checkout"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    public void testCheckoutConfiguration_existingConfiguration_shouldReturnConfigurationDTO() throws Exception {
+    void testCheckoutConfiguration_existingConfiguration_shouldReturnConfigurationDTO() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 2, 5, 0);
         var configurationJson = jsonify(originalConfiguration);
 
@@ -574,7 +557,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testCheckoutConfiguration_existingConfigurationWithTwoVersions_shouldCheckoutOriginalConfigurationUponRequest() throws Exception {
+    void testCheckoutConfiguration_existingConfigurationWithTwoVersions_shouldCheckoutOriginalConfigurationUponRequest() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 1, 2, 0);
         var originalConfigurationJson = jsonify(originalConfiguration);
 
@@ -606,13 +589,13 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testReset_nonExistingConfiguration_shouldReturnNotFound() throws Exception {
+    void testReset_nonExistingConfiguration_shouldReturnNotFound() throws Exception {
         mockMvc.perform(post(BASE_URL + "/non-existing/versions/1.0.0/reset"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    public void testReset_existingConfiguration_shouldReturnConfigurationDTO() throws Exception {
+    void testReset_existingConfiguration_shouldReturnConfigurationDTO() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 2, 5, 0);
         var configurationJson = jsonify(originalConfiguration);
 
@@ -635,7 +618,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testReset_existingConfigurationWithTwoVersions_shouldResetToOriginalConfigurationUponRequest() throws Exception {
+    void testReset_existingConfigurationWithTwoVersions_shouldResetToOriginalConfigurationUponRequest() throws Exception {
         var originalConfiguration = DtoGen.generateRandomizedConfigurationDTO(TEST_CONFIGURATION_NAME, 1, 2, 0);
         var originalConfigurationJson = jsonify(originalConfiguration);
 
@@ -667,7 +650,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testCreateConfiguration_withCustomVersionName_shouldReturnConfigurationDTO() throws Exception {
+    void testCreateConfiguration_withCustomVersionName_shouldReturnConfigurationDTO() throws Exception {
         var originalConfiguration = new ConfigurationDTO(
                 TEST_CONFIGURATION_NAME,
                 new ConfigurationVersionDTO(null, null, "custom-name"),
@@ -689,7 +672,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testUpdateConfiguration_withCustomVersionName_shouldReturnConfigurationDTO() throws Exception {
+    void testUpdateConfiguration_withCustomVersionName_shouldReturnConfigurationDTO() throws Exception {
         var originalConfiguration = new ConfigurationDTO(
                 TEST_CONFIGURATION_NAME,
                 new ConfigurationVersionDTO(null, null, null),
@@ -724,7 +707,7 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @Test
-    public void testRenameConfiguration_existingConfiguration_shouldReturnConfigurationDTO() throws Exception {
+    void testRenameConfiguration_existingConfiguration_shouldReturnConfigurationDTO() throws Exception {
         var originalConfiguration = new ConfigurationDTO(
                 TEST_CONFIGURATION_NAME,
                 new ConfigurationVersionDTO(null, null, null),
@@ -750,12 +733,12 @@ public class ConfigurationControllerIntegrationTest {
     }
 
     @SneakyThrows(JsonProcessingException.class)
-    private static String jsonify(Object object) {
+    private String jsonify(Object object) {
         return objectMapper.writeValueAsString(object);
     }
 
     @SneakyThrows({UnsupportedEncodingException.class, JsonProcessingException.class})
-    private static <T> T deserialize(MvcResult result, Class<T> clazz) {
+    private <T> T deserialize(MvcResult result, Class<T> clazz) {
         return objectMapper.readValue(result.getResponse().getContentAsString(), clazz);
     }
 }
