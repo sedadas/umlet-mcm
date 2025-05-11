@@ -39,6 +39,8 @@ public abstract class Neo4jIntegrationTest {
     protected MockMvc mockMvc;
     @Autowired
     protected ObjectMapper objectMapper;
+    @Autowired
+    protected MVCUtil mvc;
 
     @AfterAll
     static void afterAll() {
