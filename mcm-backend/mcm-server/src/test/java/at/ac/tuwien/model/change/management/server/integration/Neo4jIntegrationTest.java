@@ -15,8 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import static at.ac.tuwien.model.change.management.server.Initialize.ADMIN_PASSWORD;
-import static at.ac.tuwien.model.change.management.server.Initialize.ADMIN_USERNAME;
+import static at.ac.tuwien.model.change.management.server.Initialize.*;
 
 /**
  * Base class for integration tests using a mock MVC to call endpoints.<br/>
@@ -25,12 +24,21 @@ import static at.ac.tuwien.model.change.management.server.Initialize.ADMIN_USERN
  * To fix this, we now have a single @SpringBootTest-annotated abstract base class, which is then extended by the test subclasses.<br/>
  * Extend this class from your custom integration tests - do not add @SpringBootTest in subclasses!
  */
+
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestInstance(TestInstance.Lifecycle.PER_CLASS) //Prevent FileLockException on the DB lock file.
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS) //Prevent FileLockException on the DB lock file.
-@WithMockUser(username = ADMIN_USERNAME, password = ADMIN_PASSWORD, roles = "admin") //Allows not setting an auth header on HTTP requests with mockMVC.
-@Transactional //Rolls back any changes to the DB made by test methods.
+
+//Prevent FileLockException on the DB lock file.
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+
+//Allows not setting an auth header on HTTP requests with mockMVC.
+//Keep in mind that using roles = {} instead of authorities = {} will prefix roles with "ROLE_"!
+@WithMockUser(username = ADMIN_USERNAME, password = ADMIN_PASSWORD, authorities = { ADMIN_ROLE })
+
+//Applies @Transactional to each @Test method in every child class.
+//@Transactional methods are rolled back, so there are no changes to the DB after tests run.
+@Transactional
 public abstract class Neo4jIntegrationTest {
 
     protected static final Path INTEGRATION_TEST_TEMP_FOLDER = Path.of("integration_test_temp");

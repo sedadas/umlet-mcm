@@ -20,6 +20,7 @@ public class Initialize implements ApplicationRunner {
 
     public static final String ADMIN_USERNAME = "admin@example.com";
     public static final String ADMIN_PASSWORD = "VerySecurePassword123!";
+    public static final String ADMIN_ROLE = "admin";
 
     @Autowired
     private UserService userService;
@@ -37,7 +38,7 @@ public class Initialize implements ApplicationRunner {
 
             UserRole adminRole;
             try {
-                adminRole = userRoleService.getUserRole("admin");
+                adminRole = userRoleService.getUserRole(ADMIN_ROLE);
                 log.info("Admin role found, skipping creation...");
             } catch (UserRoleNotFoundException e) {
                 log.warn("Admin role not found, creating...");
@@ -59,7 +60,7 @@ public class Initialize implements ApplicationRunner {
 
     private UserRole configureAdminRole() {
         UserRole adminRole = new UserRole();
-        adminRole.setName("admin");
+        adminRole.setName(ADMIN_ROLE);
         return adminRole;
     }
 
