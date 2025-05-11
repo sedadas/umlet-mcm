@@ -17,6 +17,13 @@ dependencies {
     implementation(libs.gson)
     testImplementation(libs.apache.commons.lang3)
     testImplementation("org.springframework.security:spring-security-test")
+    implementation(libs.datafaker)
+    implementation(libs.spring.boot.starter.data.neo4j)
+    testImplementation(libs.spring.boot.starter.test)
+
+    testImplementation(libs.neo4j.harness) {
+        exclude(group = "org.neo4j", module = "neo4j-slf4j-provider")
+    }
 }
 
 tasks.test {

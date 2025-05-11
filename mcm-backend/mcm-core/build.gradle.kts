@@ -31,6 +31,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation(libs.gson)
     implementation("commons-validator:commons-validator:1.9.0")
+    implementation(libs.datafaker)
 
     // These libraries need to be copied to the graphdb plugins directory
     runtimeOnly(files("src\\main\\resources\\graphDB\\plugins\\neo4j-graph-data-science-2.12.0.jar"))

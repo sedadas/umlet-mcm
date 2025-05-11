@@ -26,4 +26,11 @@ public interface UserRoleEntityMapper {
      * @return list of role objects
      */
     List<UserRole> fromEntities(List<UserRoleEntity> userRoleList);
+
+    /**
+     * Converts a role object list to a list of role entities
+     * @param userRoleList list of role objects
+     * @return list of neo4j entities
+     */
+    List<UserRoleEntity> toEntities(List<UserRole> userRoleList);
 }
