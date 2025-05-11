@@ -21,7 +21,6 @@ public class Initialize implements ApplicationRunner {
     public static final String ADMIN_USERNAME = "admin@example.com";
     public static final String ADMIN_PASSWORD = "VerySecurePassword123!";
 
-public class Initialize implements ApplicationRunner {
     @Autowired
     private UserService userService;
 

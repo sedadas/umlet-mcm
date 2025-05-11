@@ -15,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import static at.ac.tuwien.model.change.management.server.InitializeUsers.ADMIN_PASSWORD;
-import static at.ac.tuwien.model.change.management.server.InitializeUsers.ADMIN_USERNAME;
+import static at.ac.tuwien.model.change.management.server.Initialize.ADMIN_PASSWORD;
+import static at.ac.tuwien.model.change.management.server.Initialize.ADMIN_USERNAME;
 
 /**
  * Base class for integration tests using a mock MVC to call endpoints.<br/>
