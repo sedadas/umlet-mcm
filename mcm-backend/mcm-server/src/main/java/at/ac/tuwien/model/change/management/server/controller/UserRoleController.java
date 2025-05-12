@@ -86,7 +86,7 @@ public class UserRoleController {
         } catch (UserValidationException e) {
             log.error("User invalid", e);
             return ResponseEntity.badRequest().build();
-        } catch (UserNotFoundException e) {
+        } catch (UserRoleNotFoundException e) {
             log.error("User not found", e);
             return ResponseEntity.notFound().build();
         }
@@ -103,7 +103,7 @@ public class UserRoleController {
         try {
             userRoleService.deleteUserRole(name);
             return ResponseEntity.noContent().build();
-        } catch (UserNotFoundException e) {
+        } catch (UserRoleNotFoundException e) {
             log.error("Role not found", e);
             return ResponseEntity.notFound().build();
         }

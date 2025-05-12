@@ -35,6 +35,13 @@ public final class MVCUtil {
         return objectMapper.readerFor(clazz).readValues(body);
     }
 
+    public MockHttpServletResponse getRequestResponse(final String ENDPOINT) throws Exception {
+        return mockMvc.perform(MockMvcRequestBuilders
+                        .get(ENDPOINT)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse();
+    }
+
     public <T, S> MappingIterator<T> postRequest(S dto, final String ENDPOINT, Class<T> clazz) throws Exception {
         final byte[] body = mockMvc.perform(MockMvcRequestBuilders
                         .post(ENDPOINT)
@@ -43,6 +50,15 @@ public final class MVCUtil {
                         .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsByteArray();
         return objectMapper.readerFor(clazz).readValues(body);
+    }
+
+    public <T> MockHttpServletResponse postRequestResponse(T dto, final String ENDPOINT) throws Exception {
+        return mockMvc.perform(MockMvcRequestBuilders
+                        .post(ENDPOINT)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse();
     }
 
     public <T, S> MappingIterator<T> putRequest(S dto, final String ENDPOINT, Class<T> clazz) throws Exception {
@@ -55,9 +71,9 @@ public final class MVCUtil {
         return objectMapper.readerFor(clazz).readValues(body);
     }
 
-    public <T> MockHttpServletResponse postRequestResponse(T dto, final String ENDPOINT) throws Exception {
+    public <T> MockHttpServletResponse putRequestResponse(T dto, final String ENDPOINT) throws Exception {
         return mockMvc.perform(MockMvcRequestBuilders
-                        .post(ENDPOINT)
+                        .put(ENDPOINT)
                         .content(objectMapper.writeValueAsString(dto))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
