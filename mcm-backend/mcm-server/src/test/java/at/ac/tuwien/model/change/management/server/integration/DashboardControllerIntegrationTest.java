@@ -16,14 +16,13 @@ import java.util.List;
 
 import static at.ac.tuwien.model.change.management.server.Initialize.ADMIN_PASSWORD;
 import static at.ac.tuwien.model.change.management.server.Initialize.ADMIN_USERNAME;
+import static at.ac.tuwien.model.change.management.server.controller.Constants.DASHBOARD_ENDPOINT;
 import static at.ac.tuwien.model.change.management.server.integration.data.TestData.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class DashboardControllerIntegrationTest extends Neo4jIntegrationTest {
-
-    private static final String DASHBOARD_ENDPOINT = "/api/v1/dashboard";
 
     @Autowired
     private DashboardEntityDAO dashboardRepository;
@@ -75,8 +74,7 @@ class DashboardControllerIntegrationTest extends Neo4jIntegrationTest {
 
             //Now delete it.
             mockMvc.perform(MockMvcRequestBuilders
-                            .delete(DASHBOARD_ENDPOINT + "/" + id)
-                            .header("Authorization", "Basic " + authToken()))
+                            .delete(DASHBOARD_ENDPOINT + "/" + id))
                     .andExpect(status().isNoContent())
                     .andReturn();
 
@@ -88,11 +86,7 @@ class DashboardControllerIntegrationTest extends Neo4jIntegrationTest {
     @Test
     @DisplayName("Attempting to delete a non-existing dashboard returns 404 Not Found.")
     void testDeleteDashboardById_givenNonExistingDashboard_returnsNotFound() throws Exception {
-        var response = mockMvc.perform(MockMvcRequestBuilders
-                        .delete(DASHBOARD_ENDPOINT + "/" + "aaa")
-                        .header("Authorization", "Basic " + authToken())
-                        .accept(MediaType.APPLICATION_JSON))
-                .andReturn().getResponse();
+        var response = mvc.deleteRequest(DASHBOARD_ENDPOINT + "/" + "aaa");
 
         assertEquals(
                 Response.Status.NOT_FOUND.getStatusCode(),
@@ -147,7 +141,6 @@ class DashboardControllerIntegrationTest extends Neo4jIntegrationTest {
     void testGetDashboardById_givenNonExistingDashboard_returnsNotFound() throws Exception {
         var response = mockMvc.perform(MockMvcRequestBuilders
                         .get(DASHBOARD_ENDPOINT + "/" + "aaa")
-                        .header("Authorization", "Basic " + authToken())
                         .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
 
@@ -213,53 +206,24 @@ class DashboardControllerIntegrationTest extends Neo4jIntegrationTest {
         }
     }
 
-    private static String authToken() {
-        return Base64.getEncoder().encodeToString((ADMIN_USERNAME + ":" + ADMIN_PASSWORD).getBytes());
-    }
-
     private MockHttpServletResponse createDashboardResponse(DashboardDTO dashboardDto) throws Exception {
         //Helper method that creates a simple dashboard and returns the HTTP response of the endpoint.
-        return mockMvc.perform(MockMvcRequestBuilders
-                        .post(DASHBOARD_ENDPOINT + "/new")
-                        .content(objectMapper.writeValueAsString(dashboardDto))
-                        .header("Authorization", "Basic " + authToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andReturn().getResponse();
+        return mvc.postRequestResponse(dashboardDto, DASHBOARD_ENDPOINT + "/new");
     }
 
     private MappingIterator<DashboardDTO> createDashboard(DashboardDTO dashboardDto) throws Exception {
-        //Helper method that creates a simple dashboard and returns the response of the endpoint.
-        final byte[] body = mockMvc.perform(MockMvcRequestBuilders
-                        .post(DASHBOARD_ENDPOINT + "/new")
-                        .content(objectMapper.writeValueAsString(dashboardDto))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Basic " + authToken())
-                        .accept(MediaType.APPLICATION_JSON))
-                .andReturn().getResponse().getContentAsByteArray();
-        return objectMapper.readerFor(DashboardDTO.class).readValues(body);
+        //Helper method that creates a simple dashboard and returns the response body.
+        return mvc.postRequest(dashboardDto, DASHBOARD_ENDPOINT + "/new", DashboardDTO.class);
     }
 
     private MappingIterator<DashboardDTO> getDashboards(List<UserRoleDTO> roles) throws Exception {
         //Helper method that calls the endpoint to get all dashboards for a list of roles.
-        final byte[] body = mockMvc.perform(MockMvcRequestBuilders
-                        .get(DASHBOARD_ENDPOINT)
-                        .content(objectMapper.writeValueAsString(roles))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Basic " + authToken())
-                        .accept(MediaType.APPLICATION_JSON))
-                .andReturn().getResponse().getContentAsByteArray();
-        return objectMapper.readerFor(DashboardDTO.class).readValues(body);
+        return mvc.getRequest(roles, DASHBOARD_ENDPOINT, DashboardDTO.class);
     }
 
     private MappingIterator<DashboardDTO> getDashboard(String id) throws Exception {
         //Helper method that calls the dashboard endpoint to get a dashboard by its id.
-        final byte[] body = mockMvc.perform(MockMvcRequestBuilders
-                        .get(DASHBOARD_ENDPOINT + "/" + id)
-                        .header("Authorization", "Basic " + authToken())
-                        .accept(MediaType.APPLICATION_JSON))
-                .andReturn().getResponse().getContentAsByteArray();
-        return objectMapper.readerFor(DashboardDTO.class).readValues(body);
+        return mvc.getRequest(DASHBOARD_ENDPOINT + "/" + id, DashboardDTO.class);
     }
 
 }

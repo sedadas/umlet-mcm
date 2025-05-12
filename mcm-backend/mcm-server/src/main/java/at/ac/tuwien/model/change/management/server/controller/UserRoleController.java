@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static at.ac.tuwien.model.change.management.server.controller.Constants.USER_ROLE_ENDPOINT;
+
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/roles")
+@RequestMapping(USER_ROLE_ENDPOINT)
 @RequiredArgsConstructor
 public class UserRoleController {
 
@@ -84,7 +86,7 @@ public class UserRoleController {
         } catch (UserValidationException e) {
             log.error("User invalid", e);
             return ResponseEntity.badRequest().build();
-        } catch (UserNotFoundException e) {
+        } catch (UserRoleNotFoundException e) {
             log.error("User not found", e);
             return ResponseEntity.notFound().build();
         }
@@ -101,7 +103,7 @@ public class UserRoleController {
         try {
             userRoleService.deleteUserRole(name);
             return ResponseEntity.noContent().build();
-        } catch (UserNotFoundException e) {
+        } catch (UserRoleNotFoundException e) {
             log.error("Role not found", e);
             return ResponseEntity.notFound().build();
         }

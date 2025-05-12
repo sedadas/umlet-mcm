@@ -79,7 +79,7 @@ public class UserRoleServiceImpl implements UserRoleService {
     @Override
     public void deleteUserRole(String name) throws UserRoleNotFoundException {
         if(!userRoleRepository.existsById(name)) {
-            throw new UserNotFoundException("Role %s not found".formatted(name));
+            throw new UserRoleNotFoundException("Role %s not found".formatted(name));
         }
         userRoleRepository.deleteById(name);
     }
