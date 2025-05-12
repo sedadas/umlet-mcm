@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
          *      at least 8 characters
          * See: https://stackoverflow.com/questions/3802192/regexp-java-for-password-validation
          */
-        final String pattern = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!?@#$%^&+=])(?=\\S+$).{8,}";
+        final String pattern = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!?@#$%^&+=_])(?=\\S+$).{8,}";
 
         if(user.getPassword().isEmpty() || !user.getPassword().matches(pattern)) {
             throw new UserValidationException("Password does not adhere to the password policy");
