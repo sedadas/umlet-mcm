@@ -11,11 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.Base64;
 import java.util.List;
 
-import static at.ac.tuwien.model.change.management.server.Initialize.ADMIN_PASSWORD;
-import static at.ac.tuwien.model.change.management.server.Initialize.ADMIN_USERNAME;
 import static at.ac.tuwien.model.change.management.server.controller.Constants.DASHBOARD_ENDPOINT;
 import static at.ac.tuwien.model.change.management.server.integration.data.TestData.*;
 import static org.junit.jupiter.api.Assertions.*;
