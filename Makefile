@@ -31,8 +31,15 @@ backend:
 	cd $(BACKEND_DIR) && $(GRADLE_WRAPPER_COMMAND) :mcm-core:assemble
 	cd $(BACKEND_DIR) && $(GRADLE_WRAPPER_COMMAND) :mcm-server:assemble
 
+# COMPOSE_BAKE is broken on Windows on latest versions of docker compose.
+# See https://github.com/docker/for-win/issues/14761.
+ifeq ($(OS), Windows_NT)
+docker:
+	docker compose build
+else
 docker:
 	COMPOSE_BAKE=true docker compose build
+endif
 
 push:
 	docker compose push
