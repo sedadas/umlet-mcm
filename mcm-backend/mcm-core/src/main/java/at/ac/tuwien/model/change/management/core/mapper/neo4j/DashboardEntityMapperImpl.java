@@ -21,6 +21,7 @@ public class DashboardEntityMapperImpl implements DashboardEntityMapper {
 
         entity.setId(dashboard.getId());
         entity.setAllowedRoles(userRoleEntityMapper.toEntities(dashboard.getAllowedRoles()));
+        entity.setNodeIds(dashboard.getNodeIds());
 
         return entity;
     }
@@ -31,6 +32,7 @@ public class DashboardEntityMapperImpl implements DashboardEntityMapper {
 
         dto.setId(dashboardEntity.getId());
         dto.setAllowedRoles(userRoleEntityMapper.fromEntities(dashboardEntity.getAllowedRoles()));
+        dto.setNodeIds(dashboardEntity.getNodeIds());
 
         return dto;
     }

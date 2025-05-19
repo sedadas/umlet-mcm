@@ -21,4 +21,6 @@ public class DashboardEntity {
 
     @Relationship(value = "VISIBLE_FOR")
     private List<UserRoleEntity> allowedRoles;
+
+    private List<String> nodeIds;
 }
