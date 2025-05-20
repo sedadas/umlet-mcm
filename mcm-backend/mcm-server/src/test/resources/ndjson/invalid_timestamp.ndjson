@@ -1,0 +1,3 @@
+{"timestamp":"2025-05-20","datasources":[{"name":"source1","value":"value1"}]}
+{"timestamp":"not-a-date","datasources":[{"name":"source2","value":123}]}
+{"timestamp":"2025/05/22 08:15:30","datasources":[{"name":"source3","value":true}]}

@@ -1,0 +1,4 @@
+{"timestamp":"2025-05-20T14:23:45Z","datasources":[{"name":"source1","value":"value1"}]}
+{"timestamp":"invalid-date","datasources":[{"name":"source2","value":123}]}
+{"timestamp":"2025-05-22T08:15:30Z","datasources":[]}
+{"timestamp":"2025-05-23T16:45:10Z","datasources":[{"name":"source4","value":"value4"}]}
