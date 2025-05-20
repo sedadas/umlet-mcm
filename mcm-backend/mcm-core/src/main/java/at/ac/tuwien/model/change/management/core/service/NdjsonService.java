@@ -2,6 +2,7 @@ package at.ac.tuwien.model.change.management.core.service;
 
 import at.ac.tuwien.model.change.management.core.model.Configuration;
 import at.ac.tuwien.model.change.management.core.model.Model;
+import at.ac.tuwien.model.change.management.core.model.NdjsonEntry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,12 +10,15 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashSet;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -52,11 +56,49 @@ public class NdjsonService {
                     continue; // Skip empty lines
                 }
 
+                // First validate the line against the NdjsonEntry structure
                 try {
-                    Model model = objectMapper.readValue(line, Model.class);
-                    models.add(model);
+                    // Try to parse as NdjsonEntry to validate structure
+                    NdjsonEntry entry = objectMapper.readValue(line, NdjsonEntry.class);
+
+                    // Validate timestamp format (ISO 8601)
+                    try {
+                        DateTimeFormatter.ISO_DATE_TIME.parse(entry.getTimestamp());
+                    } catch (DateTimeParseException e) {
+                        validationErrors.add("Error on line " + lineNumber + ": Invalid timestamp format. Expected ISO 8601 format (e.g., '2025-05-20T14:23:45Z')");
+                        continue;
+                    }
+
+                    // Validate datasources
+                    if (entry.getDatasources() == null || entry.getDatasources().isEmpty()) {
+                        validationErrors.add("Error on line " + lineNumber + ": Datasources array is empty or missing");
+                        continue;
+                    }
+
+                    // Validate each datasource has name and value
+                    boolean hasInvalidDatasource = false;
+                    for (int i = 0; i < entry.getDatasources().size(); i++) {
+                        NdjsonEntry.Datasource datasource = entry.getDatasources().get(i);
+                        if (datasource.getName() == null || datasource.getName().trim().isEmpty()) {
+                            validationErrors.add("Error on line " + lineNumber + ": Datasource at index " + i + " has missing or empty name");
+                            hasInvalidDatasource = true;
+                            break;
+                        }
+                    }
+
+                    if (hasInvalidDatasource) {
+                        continue;
+                    }
+
+                    // If validation passes, convert NdjsonEntry to Model
+                    try {
+                        Model model = convertNdjsonEntryToModel(entry);
+                        models.add(model);
+                    } catch (Exception e) {
+                        validationErrors.add("Error converting line " + lineNumber + " to Model: " + e.getMessage());
+                    }
                 } catch (Exception e) {
-                    validationErrors.add("Error parsing line " + lineNumber + ": " + e.getMessage());
+                    validationErrors.add("Error on line " + lineNumber + ": Invalid NDJSON entry format. " + e.getMessage());
                 }
             }
 
@@ -155,5 +197,40 @@ public class NdjsonService {
             log.error("Error exporting all models to NDJSON", e);
             return new ByteArrayResource("".getBytes(StandardCharsets.UTF_8));
         }
+    }
+
+    /**
+     * Converts an NdjsonEntry to a Model.
+     *
+     * @param entry The NdjsonEntry to convert
+     * @return The converted Model
+     */
+    private Model convertNdjsonEntryToModel(NdjsonEntry entry) {
+        Model model = new Model();
+
+        // Set a unique ID based on the timestamp
+        model.setId(entry.getTimestamp().replace(":", "-").replace(".", "-"));
+
+        // Set title from the first datasource name
+        if (entry.getDatasources() != null && !entry.getDatasources().isEmpty()) {
+            model.setTitle(entry.getDatasources().getFirst().getName());
+        }
+
+        // Set description from the timestamp and datasources
+        StringBuilder description = new StringBuilder();
+        description.append("Timestamp: ").append(entry.getTimestamp()).append("\n\n");
+        description.append("Datasources:\n");
+
+        for (NdjsonEntry.Datasource datasource : entry.getDatasources()) {
+            description.append("- ").append(datasource.getName()).append(": ")
+                      .append(datasource.getValue()).append("\n");
+        }
+
+        model.setDescription(description.toString());
+
+        // Initialize empty nodes set
+        model.setNodes(new HashSet<>());
+
+        return model;
     }
 }
