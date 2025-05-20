@@ -10,9 +10,11 @@ import at.ac.tuwien.model.change.management.server.dto.UserDTO;
 import at.ac.tuwien.model.change.management.server.mapper.UserDtoMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Base64;
 import java.util.List;
 
 import static at.ac.tuwien.model.change.management.server.controller.Constants.USER_ENDPOINT;
@@ -55,13 +57,34 @@ public class UserController {
     }
 
     /**
+     * Get myself as a user
+     * @param auth Basic auth header
+     * @return code 200 and the user if found
+     *         code 404 if no such user has been found
+     */
+    @GetMapping("/self")
+    public ResponseEntity<UserDTO> lookupSelf(@RequestHeader(HttpHeaders.AUTHORIZATION) String auth) {
+        try {
+            String[] headerRes = auth.split("Basic ");
+            byte[] decodedBytes = Base64.getDecoder().decode(headerRes[1]);
+            String decodedString = new String(decodedBytes);
+            String[] credentials = decodedString.split(":");
+            var user = userService.getUser(credentials[0]);
+            return ResponseEntity.ok(userDtoMapper.toDto(user));
+        } catch (UserNotFoundException e) {
+            log.error("User not found", e);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
      * Create a new user
      * @param userDTO user to create
      * @return code 200 and the user if successful
      *         code 400 if the user already exists or validation failed
      */
     @PostMapping
-    public ResponseEntity<UserDTO> addUser(@RequestBody  UserDTO userDTO) {
+    public ResponseEntity<UserDTO> addUser(@RequestBody UserDTO userDTO) {
         try {
             var user = userService.createUser(userDtoMapper.fromDto(userDTO));
             return ResponseEntity.ok(userDtoMapper.toDto(user));
