@@ -1,6 +1,7 @@
 package at.ac.tuwien.model.change.management.core.model;
 
 
+import at.ac.tuwien.model.change.management.QueryDashboard;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +18,7 @@ public class User implements UserDetails {
     private String username;
     private String password;
     private List<UserRole> roles;
+    private List<QueryDashboard> privateDashboards;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

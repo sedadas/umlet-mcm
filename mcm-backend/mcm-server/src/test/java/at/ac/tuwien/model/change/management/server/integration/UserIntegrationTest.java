@@ -39,13 +39,15 @@ class UserIntegrationTest extends Neo4jIntegrationTest {
             assertEquals(3, users.size());
             users.removeIf(user -> user.username().equals(ADMIN_USERNAME));
 
-            assertEquals(user1.username(), users.get(0).username());
-            assertTrue(passEncoder.matches(user1.password(), users.get(0).password()));
+            assertEquals(user1.username(), users.getFirst().username());
+            assertTrue(passEncoder.matches(user1.password(), users.getFirst().password()));
             assertArrayEquals(user1.roles().toArray(), users.get(0).roles().toArray());
+            assertArrayEquals(user1.privateDashboards().toArray(), users.get(0).privateDashboards().toArray());
 
             assertEquals(user2.username(), users.get(1).username());
             assertTrue(passEncoder.matches(user2.password(), users.get(1).password()));
             assertArrayEquals(user2.roles().toArray(), users.get(1).roles().toArray());
+            assertArrayEquals(user2.privateDashboards().toArray(), users.get(1).privateDashboards().toArray());
         }
     }
 
@@ -129,6 +131,7 @@ class UserIntegrationTest extends Neo4jIntegrationTest {
             assertEquals(user.username(), created.username());
             assertTrue(passEncoder.matches(user.password(), created.password()));
             assertArrayEquals(user.roles().toArray(), created.roles().toArray());
+            assertArrayEquals(user.privateDashboards().toArray(), created.privateDashboards().toArray());
         }
     }
 
@@ -167,13 +170,19 @@ class UserIntegrationTest extends Neo4jIntegrationTest {
         var user = validNonExistingUser();
         try (var iterator = createUser(user)) { /* Empty */}
 
-        var toUpdate = new UserDTO(user.username(), validPassword(), validNonExistingRoles());
+        var toUpdate = new UserDTO(
+                user.username(),
+                validPassword(),
+                validNonExistingRoles(),
+                validNonExistingQueryDashboards()
+        );
         try (var iterator = updateUser(toUpdate)) {
             var updated = iterator.next();
 
             assertEquals(toUpdate.username(), updated.username());
             assertTrue(passEncoder.matches(toUpdate.password(), updated.password()));
             assertArrayEquals(toUpdate.roles().toArray(), updated.roles().toArray());
+            assertArrayEquals(toUpdate.privateDashboards().toArray(), updated.privateDashboards().toArray());
 
             assertFalse(iterator.hasNext());
         }
@@ -195,7 +204,12 @@ class UserIntegrationTest extends Neo4jIntegrationTest {
         var user = validNonExistingUser();
         try (var iterator = createUser(user)) { /* Empty */ }
 
-        var invalidUser = new UserDTO(user.username(), invalidPassword(), validNonExistingRoles());
+        var invalidUser = new UserDTO(
+                user.username(),
+                invalidPassword(),
+                validNonExistingRoles(),
+                validNonExistingQueryDashboards()
+        );
         var response = updateUserResponse(invalidUser);
         assertEquals(
                 Response.Status.BAD_REQUEST.getStatusCode(),
