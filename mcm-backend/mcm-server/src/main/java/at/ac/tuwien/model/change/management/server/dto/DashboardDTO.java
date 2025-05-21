@@ -7,6 +7,7 @@ import java.util.List;
 
 public record DashboardDTO(
         @Nullable String id,
-        @NotEmpty List<UserRoleDTO> allowedRoles
+        @NotEmpty List<UserRoleDTO> allowedRoles,
+        @NotEmpty List<String> nodeIds
 ) {
 }

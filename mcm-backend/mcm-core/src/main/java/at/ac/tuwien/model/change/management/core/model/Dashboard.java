@@ -12,4 +12,5 @@ import java.util.List;
 public class Dashboard {
     private String id;
     private List<UserRole> allowedRoles;
+    private List<String> nodeIds;
 }

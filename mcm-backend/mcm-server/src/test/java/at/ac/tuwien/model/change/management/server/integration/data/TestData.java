@@ -13,16 +13,41 @@ public class TestData {
     public static DashboardDTO validDashboardWithoutIdDTO() {
         return new DashboardDTO(
                 null,
-                validNonExistingRoles()
+                validNonExistingRoles(),
+                validNonExistingIds()
         );
     }
 
     public static DashboardDTO invalidDashboardWithNullRoles() {
-        return new DashboardDTO(null, null);
+        return new DashboardDTO(
+                null,
+                null,
+                validNonExistingIds()
+        );
     }
 
     public static DashboardDTO invalidDashboardWithEmptyRoles() {
-        return new DashboardDTO(null, List.of());
+        return new DashboardDTO(
+                null,
+                List.of(),
+                validNonExistingIds()
+        );
+    }
+
+    public static DashboardDTO invalidDashboardWithNullIds() {
+        return new DashboardDTO(
+                null,
+                validNonExistingRoles(),
+                null
+        );
+    }
+
+    public static DashboardDTO invalidDashboardWithEmptyIds() {
+        return new DashboardDTO(
+                null,
+                validNonExistingRoles(),
+                List.of()
+        );
     }
 
     public static List<UserRoleDTO> validNonExistingRoles() {
@@ -42,6 +67,17 @@ public class TestData {
             faker.regexify("^[a-zA-Z]{5,20}$"),
             validNonExistingPermissions()
         );
+    }
+
+    public static List<String> validNonExistingIds() {
+        Faker faker = new Faker();
+        var ids = new ArrayList<String>();
+
+        ids.add(faker.regexify("^ID_[a-zA-Z]{5,20}$"));
+        ids.add(faker.regexify("^ID_[a-zA-Z]{5,20}$"));
+        ids.add(faker.regexify("^ID_[a-zA-Z]{5,20}$"));
+
+        return ids;
     }
 
     public static List<String> validNonExistingPermissions() {

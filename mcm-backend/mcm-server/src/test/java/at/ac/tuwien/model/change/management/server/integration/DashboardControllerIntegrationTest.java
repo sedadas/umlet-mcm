@@ -38,26 +38,44 @@ class DashboardControllerIntegrationTest extends Neo4jIntegrationTest {
                     dashboard.allowedRoles().toArray(),
                     "Create endpoint did not return a dashboard with correct allowed roles!"
             );
+            assertArrayEquals(
+                    dashboardDto.nodeIds().toArray(),
+                    dashboard.nodeIds().toArray(),
+                    "Create endpoint did not return a dashboard with correct node ids!"
+            );
         }
     }
 
     @Test
     @DisplayName("Attempting to create a dashboard with invalid arguments returns 400 Bad Request.")
     void testCreateDashboard_givenInvalidDashboard_returnsBadRequest() throws Exception {
+
         assertEquals(
             Response.Status.BAD_REQUEST.getStatusCode(),
             createDashboardResponse(null).getStatus(),
             "Attempting to create a null dashboard should return 400 Bad Request!"
         );
+
         assertEquals(
                 Response.Status.BAD_REQUEST.getStatusCode(),
                 createDashboardResponse(invalidDashboardWithNullRoles()).getStatus(),
-                "Attempting to create a null dashboard should return 400 Bad Request!"
+                "Attempting to create a dashboard with null roles should return 400 Bad Request!"
         );
         assertEquals(
                 Response.Status.BAD_REQUEST.getStatusCode(),
                 createDashboardResponse(invalidDashboardWithEmptyRoles()).getStatus(),
-                "Attempting to create a null dashboard should return 400 Bad Request!"
+                "Attempting to create a dashboard with empty roles should return 400 Bad Request!"
+        );
+
+        assertEquals(
+                Response.Status.BAD_REQUEST.getStatusCode(),
+                createDashboardResponse(invalidDashboardWithNullIds()).getStatus(),
+                "Attempting to create a dashboard with null node ids should return 400 Bad Request!"
+        );
+        assertEquals(
+                Response.Status.BAD_REQUEST.getStatusCode(),
+                createDashboardResponse(invalidDashboardWithEmptyIds()).getStatus(),
+                "Attempting to create a dashboard with empty node ids should return 400 Bad Request!"
         );
     }
 
@@ -119,6 +137,11 @@ class DashboardControllerIntegrationTest extends Neo4jIntegrationTest {
                     result.allowedRoles().toArray(),
                     "Getting a dashboard by id did not return the correct dashboard!"
             );
+            assertArrayEquals(
+                    dashboard1.nodeIds().toArray(),
+                    result.nodeIds().toArray(),
+                    "Getting a dashboard by id did not return the correct dashboard!"
+            );
             assertFalse(iterator.hasNext(), "Only 1 dashboard should be returned!");
         }
         try (var iterator = getDashboard(id2)) {
@@ -127,6 +150,11 @@ class DashboardControllerIntegrationTest extends Neo4jIntegrationTest {
             assertArrayEquals(
                     dashboard2.allowedRoles().toArray(),
                     result.allowedRoles().toArray(),
+                    "Getting a dashboard by id did not return the correct dashboard!"
+            );
+            assertArrayEquals(
+                    dashboard2.nodeIds().toArray(),
+                    result.nodeIds().toArray(),
                     "Getting a dashboard by id did not return the correct dashboard!"
             );
             assertFalse(iterator.hasNext(), "Only 1 dashboard should be returned!");
@@ -157,9 +185,9 @@ class DashboardControllerIntegrationTest extends Neo4jIntegrationTest {
         final var role3 = validNonExistingRole();
         final var role4 = validNonExistingRole(); //No dashboard with this role.
 
-        final var dashboard1 = new DashboardDTO(null, List.of(role1));
-        final var dashboard2 = new DashboardDTO(null, List.of(role2));
-        final var dashboard3 = new DashboardDTO(null, List.of(role2, role3));
+        final var dashboard1 = new DashboardDTO(null, List.of(role1), validNonExistingIds());
+        final var dashboard2 = new DashboardDTO(null, List.of(role2), validNonExistingIds());
+        final var dashboard3 = new DashboardDTO(null, List.of(role2, role3), validNonExistingIds());
 
         //1. Create the dashboards.
         String id1, id2, id3;

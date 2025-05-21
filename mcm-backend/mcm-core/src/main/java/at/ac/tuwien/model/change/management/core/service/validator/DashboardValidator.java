@@ -10,9 +10,15 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DashboardValidator {
     public void validateForCreate(@NotNull Dashboard dashboard) {
+        
         if (dashboard.getAllowedRoles() == null)
             throw new InvalidDashboardException("Allowed roles of dashboard cannot be null!");
         if (dashboard.getAllowedRoles().isEmpty())
             throw new InvalidDashboardException("Allowed roles of dashboard cannot be empty!");
+
+        if (dashboard.getNodeIds() == null)
+            throw new InvalidDashboardException("Node IDs of dashboard cannot be null!");
+        if (dashboard.getNodeIds().isEmpty())
+            throw new InvalidDashboardException("Node IDs of dashboard cannot be empty!");
     }
 }
