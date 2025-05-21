@@ -1,6 +1,7 @@
 package at.ac.tuwien.model.change.management.server.integration.data;
 
 import at.ac.tuwien.model.change.management.server.dto.DashboardDTO;
+import at.ac.tuwien.model.change.management.server.dto.QueryDashboardDTO;
 import at.ac.tuwien.model.change.management.server.dto.UserDTO;
 import at.ac.tuwien.model.change.management.server.dto.UserRoleDTO;
 import net.datafaker.Faker;
@@ -70,14 +71,18 @@ public class TestData {
     }
 
     public static List<String> validNonExistingIds() {
-        Faker faker = new Faker();
         var ids = new ArrayList<String>();
 
-        ids.add(faker.regexify("^ID_[a-zA-Z]{5,20}$"));
-        ids.add(faker.regexify("^ID_[a-zA-Z]{5,20}$"));
-        ids.add(faker.regexify("^ID_[a-zA-Z]{5,20}$"));
+        ids.add(validNonExistingId());
+        ids.add(validNonExistingId());
+        ids.add(validNonExistingId());
 
         return ids;
+    }
+
+    public static String validNonExistingId() {
+        Faker faker = new Faker();
+        return faker.regexify("^ID_[a-zA-Z]{5,20}$");
     }
 
     public static List<String> validNonExistingPermissions() {
@@ -91,11 +96,38 @@ public class TestData {
         return permissions;
     }
 
+    public static List<QueryDashboardDTO> validNonExistingQueryDashboards() {
+        List<QueryDashboardDTO> result = new ArrayList<>();
+
+        result.add(validNonExistingQueryDashboard());
+        result.add(validNonExistingQueryDashboard());
+        result.add(validNonExistingQueryDashboard());
+
+        return result;
+    }
+
+    public static QueryDashboardDTO validNonExistingQueryDashboard() {
+        return new QueryDashboardDTO(
+            validNonExistingId(),
+            validNonExistingIds()
+        );
+    }
+
     public static UserDTO validNonExistingUser() {
         return new UserDTO(
             validNonExistingUsername(),
             validPassword(),
-            validNonExistingRoles()
+            validNonExistingRoles(),
+            validNonExistingQueryDashboards()
+        );
+    }
+
+    public static UserDTO validNonExistingUserWithoutQueryDashboards() {
+        return new UserDTO(
+                validNonExistingUsername(),
+                validPassword(),
+                validNonExistingRoles(),
+                null
         );
     }
 
@@ -103,7 +135,8 @@ public class TestData {
         return new UserDTO(
                 invalidUsername(),
                 validPassword(),
-                validNonExistingRoles()
+                validNonExistingRoles(),
+                validNonExistingQueryDashboards()
         );
     }
 
@@ -111,7 +144,8 @@ public class TestData {
         return new UserDTO(
                 validNonExistingUsername(),
                 invalidPassword(),
-                validNonExistingRoles()
+                validNonExistingRoles(),
+                validNonExistingQueryDashboards()
         );
     }
 

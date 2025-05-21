@@ -18,4 +18,7 @@ public class UserEntity {
 
     @Relationship(type = "HAS_ROLE")
     private List<UserRoleEntity> roles;
+
+    @Relationship(type = "HAS_PRIVATE_DASHBOARD")
+    private List<QueryDashboardEntity> privateDashboards;
 }
