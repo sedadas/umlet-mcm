@@ -122,6 +122,15 @@ public class TestData {
         );
     }
 
+    public static UserDTO validNonExistingUserWithoutQueryDashboards() {
+        return new UserDTO(
+                validNonExistingUsername(),
+                validPassword(),
+                validNonExistingRoles(),
+                null
+        );
+    }
+
     public static UserDTO invalidUserWithInvalidName() {
         return new UserDTO(
                 invalidUsername(),

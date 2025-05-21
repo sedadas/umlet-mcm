@@ -251,6 +251,28 @@ class UserIntegrationTest extends Neo4jIntegrationTest {
         );
     }
 
+    @Test
+    @DisplayName("Editing a user can persist query dashboards.")
+    void testEditUser_givenValidUser_updatesQueryDashboards() throws Exception {
+        var user = validNonExistingUserWithoutQueryDashboards();
+        try (var iterator = createUser(user)) {
+            var created = iterator.next();
+            assertNull(created.privateDashboards());
+        }
+
+        var toUpdate = new UserDTO(
+            user.username(),
+            user.password(),
+            user.roles(),
+            validNonExistingQueryDashboards()
+        );
+        try (var iterator = updateUser(toUpdate)) {
+            var updated = iterator.next();
+            assertNotNull(updated.privateDashboards());
+            assertArrayEquals(toUpdate.privateDashboards().toArray(), updated.privateDashboards().toArray());
+        }
+    }
+
     private MappingIterator<UserDTO> createUser(UserDTO userDTO) throws Exception {
         return mvc.postRequest(userDTO, USER_ENDPOINT, UserDTO.class);
     }
