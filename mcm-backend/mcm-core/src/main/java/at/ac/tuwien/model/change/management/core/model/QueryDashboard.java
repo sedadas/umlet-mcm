@@ -1,4 +1,4 @@
-package at.ac.tuwien.model.change.management;
+package at.ac.tuwien.model.change.management.core.model;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -11,5 +11,5 @@ import java.util.List;
 @EqualsAndHashCode
 public class QueryDashboard {
     private String id;
-    private List<String> nodeIds;
+    private List<Filter> query;
 }
