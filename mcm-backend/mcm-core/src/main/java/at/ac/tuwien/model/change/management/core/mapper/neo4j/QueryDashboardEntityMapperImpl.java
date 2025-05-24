@@ -1,6 +1,6 @@
 package at.ac.tuwien.model.change.management.core.mapper.neo4j;
 
-import at.ac.tuwien.model.change.management.QueryDashboard;
+import at.ac.tuwien.model.change.management.core.model.QueryDashboard;
 import at.ac.tuwien.model.change.management.graphdb.entities.QueryDashboardEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +12,9 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class QueryDashboardEntityMapperImpl implements QueryDashboardEntityMapper {
+
+    private final FilterEntityMapper filterEntityMapper;
+
     @Override
     public QueryDashboardEntity toEntity(QueryDashboard queryDashboard) {
         if (queryDashboard == null)
@@ -20,7 +23,7 @@ public class QueryDashboardEntityMapperImpl implements QueryDashboardEntityMappe
         var entity = new QueryDashboardEntity();
 
         entity.setId(queryDashboard.getId());
-        entity.setNodeIds(queryDashboard.getNodeIds());
+        entity.setQuery(filterEntityMapper.toEntities(queryDashboard.getQuery()));
 
         return entity;
     }
@@ -33,7 +36,7 @@ public class QueryDashboardEntityMapperImpl implements QueryDashboardEntityMappe
         var dto = new QueryDashboard();
 
         dto.setId(queryDashboardEntity.getId());
-        dto.setNodeIds(queryDashboardEntity.getNodeIds());
+        dto.setQuery(filterEntityMapper.fromEntities(queryDashboardEntity.getQuery()));
 
         return dto;
     }

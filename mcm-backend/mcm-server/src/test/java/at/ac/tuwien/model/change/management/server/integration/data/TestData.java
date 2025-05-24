@@ -1,55 +1,16 @@
 package at.ac.tuwien.model.change.management.server.integration.data;
 
-import at.ac.tuwien.model.change.management.server.dto.DashboardDTO;
 import at.ac.tuwien.model.change.management.server.dto.QueryDashboardDTO;
 import at.ac.tuwien.model.change.management.server.dto.UserDTO;
 import at.ac.tuwien.model.change.management.server.dto.UserRoleDTO;
 import net.datafaker.Faker;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TestData {
-
-    public static DashboardDTO validDashboardWithoutIdDTO() {
-        return new DashboardDTO(
-                null,
-                validNonExistingRoles(),
-                validNonExistingIds()
-        );
-    }
-
-    public static DashboardDTO invalidDashboardWithNullRoles() {
-        return new DashboardDTO(
-                null,
-                null,
-                validNonExistingIds()
-        );
-    }
-
-    public static DashboardDTO invalidDashboardWithEmptyRoles() {
-        return new DashboardDTO(
-                null,
-                List.of(),
-                validNonExistingIds()
-        );
-    }
-
-    public static DashboardDTO invalidDashboardWithNullIds() {
-        return new DashboardDTO(
-                null,
-                validNonExistingRoles(),
-                null
-        );
-    }
-
-    public static DashboardDTO invalidDashboardWithEmptyIds() {
-        return new DashboardDTO(
-                null,
-                validNonExistingRoles(),
-                List.of()
-        );
-    }
 
     public static List<UserRoleDTO> validNonExistingRoles() {
         var roles = new ArrayList<UserRoleDTO>();
@@ -70,14 +31,15 @@ public class TestData {
         );
     }
 
-    public static List<String> validNonExistingIds() {
-        var ids = new ArrayList<String>();
+    public static Map<String, String> validNonExistingQueryMap() {
+        Faker faker = new Faker();
+        var queryMap = new HashMap<String, String>();
 
-        ids.add(validNonExistingId());
-        ids.add(validNonExistingId());
-        ids.add(validNonExistingId());
+        queryMap.put(faker.regexify("^[a-zA-Z]{5,20}$"), faker.regexify("^[a-zA-Z]{5,20}$"));
+        queryMap.put(faker.regexify("^[a-zA-Z]{5,20}$"), faker.regexify("^[a-zA-Z]{5,20}$"));
+        queryMap.put(faker.regexify("^[a-zA-Z]{5,20}$"), faker.regexify("^[a-zA-Z]{5,20}$"));
 
-        return ids;
+        return queryMap;
     }
 
     public static String validNonExistingId() {
@@ -109,7 +71,7 @@ public class TestData {
     public static QueryDashboardDTO validNonExistingQueryDashboard() {
         return new QueryDashboardDTO(
             validNonExistingId(),
-            validNonExistingIds()
+            validNonExistingQueryMap()
         );
     }
 
