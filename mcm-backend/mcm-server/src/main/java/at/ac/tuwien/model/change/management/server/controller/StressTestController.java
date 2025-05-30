@@ -7,6 +7,7 @@ import at.ac.tuwien.model.change.management.server.mapper.conemo.NodeEntityDTOMa
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -27,10 +28,10 @@ public class StressTestController {
     private List<NodeEntity> saved = new ArrayList<>();
 
     @PostMapping
+    @Transactional
     public ResponseEntity<Void> loadNodes(@RequestBody NodeEntityDTOList dto) {
         //Convert CONEMO nodes to MCM nodes and store them directly using the repository!
-        System.out.println("LOAD NODES CALLED!");
-        System.out.println(Arrays.toString(dto.nodes().toArray()));
+        log.info(Arrays.toString(dto.nodes().toArray()));
         saved = nodeEntityDAO.saveAll(conemoMapper.toEntities(dto.nodes()));
         return ResponseEntity.ok().build();
     }
