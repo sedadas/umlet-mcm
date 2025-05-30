@@ -1,7 +1,6 @@
 package at.ac.tuwien.model.change.management.server.controller;
 
 
-import at.ac.tuwien.model.change.management.core.exception.UserNotFoundException;
 import at.ac.tuwien.model.change.management.core.exception.UserRoleAlreadyExistsException;
 import at.ac.tuwien.model.change.management.core.exception.UserRoleNotFoundException;
 import at.ac.tuwien.model.change.management.core.exception.UserValidationException;
