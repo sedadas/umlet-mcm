@@ -51,6 +51,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v1/users/self").authenticated()
                                 .requestMatchers("/api/v1/users").hasAuthority("admin")
                                 .requestMatchers("/api/v1/roles").hasAuthority("admin")
+                                .requestMatchers("/api/v1/stresstest").hasAuthority("admin")
                                 .anyRequest().authenticated()
                 );
         return httpSecurity.build();
