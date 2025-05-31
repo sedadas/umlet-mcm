@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.neo4j.driver.Value;
+import org.neo4j.driver.Values;
 import org.neo4j.driver.internal.InternalNode;
 import org.neo4j.driver.internal.value.FloatValue;
 import org.neo4j.driver.internal.value.IntegerValue;
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -319,5 +321,53 @@ public class GraphDBServiceImpl implements GraphDBService {
     public void clearDatabase() {
         rawNeo4jService.clearDatabaseIgnoreUsers();
         log.info("Cleared the graph database.");
+    }
+
+    /**
+     * For each entry in valuesByName (name→value), find the node whose
+     * umletProperties.conemoType = 'datasource' and name = row.name,
+     * then set two new properties: dataspaceTimestamp and dataspaceValue.
+     *
+     * @param timestamp     an ISO‐8601 string, e.g. "2025-06-01T10:15:00Z"
+     * @param valuesByName  map from datasource‐node name to its value
+     */
+    @Override
+    public void upsertDataspaceProperties(@NonNull String timestamp,
+                                          @NonNull Map<String, Object> valuesByName) {
+        if (valuesByName.isEmpty()) {
+            log.warn("upsertDataspaceProperties called with empty map → skipping update.");
+            return;
+        }
+
+        // Build a batch payload: List of { name: <assetName>, ts: <timestamp>, val: <valueString> }
+        List<Map<String, Object>> batch = valuesByName.entrySet().stream()
+                .map(entry -> {
+                    Map<String, Object> record = new HashMap<>();
+                    record.put("name", entry.getKey());
+                    record.put("val", entry.getValue() == null
+                            ? null
+                            : entry.getValue().toString());
+                    record.put("ts", timestamp);
+                    return record;
+                })
+                .collect(Collectors.toList());
+
+        // Cypher: UNWIND the batch, match each node by name + umletProperties.conemoType='datasource',
+        // then set the two new properties (dataspaceTimestamp, dataspaceValue).
+        String cypher = ""
+                + "UNWIND $batch AS row\n"
+                + "MATCH (d { name: row.name })\n"
+                + "WHERE d.`umletProperties.conemoType` = 'datasource'\n"
+                + "SET d.dataspaceTimestamp = row.ts,\n"
+                + "    d.dataspaceValue     = row.val";
+
+        try {
+            rawNeo4jService.executeWriteQuery(cypher, Map.of("batch", batch));
+            log.info("upsertDataspaceProperties: set dataspaceTimestamp & dataspaceValue on {} records",
+                    batch.size());
+        } catch (Exception e) {
+            log.error("Error in upsertDataspaceProperties", e);
+            throw new RuntimeException("Failed to upsert dataspace properties", e);
+        }
     }
 }
