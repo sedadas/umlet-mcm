@@ -4,11 +4,10 @@ import at.ac.tuwien.model.change.management.graphdb.entities.NodeEntity;
 import at.ac.tuwien.model.change.management.graphdb.entities.RelationEntity;
 import at.ac.tuwien.model.change.management.server.dto.conemo.NodeEntityDTO;
 import org.mapstruct.Mapper;
+import org.neo4j.driver.Value;
+import org.neo4j.driver.internal.value.StringValue;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Mapper(componentModel = "spring")
 public class NodeEntityDTOMapper {
@@ -32,6 +31,13 @@ public class NodeEntityDTOMapper {
                 continue;
 
             relation.setTarget(toEntityNoRelations(targetDto.get()));
+
+            //CONEMO requires an empty properties name to identify this as an Asset/Condition Relationship object.
+            var properties = new HashMap<String, Value>();
+            Value val = new StringValue("");
+            properties.put("name", val);
+
+            relation.setProperties(properties);
             relationEntities.add(relation);
         }
         entity.setRelations(relationEntities);
