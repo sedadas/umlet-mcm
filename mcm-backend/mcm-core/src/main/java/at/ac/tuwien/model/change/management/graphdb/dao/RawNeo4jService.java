@@ -48,12 +48,33 @@ public class RawNeo4jService {
     }
 
     /**
-     * Generates a CSV file from the Neo4j database and stores it inside the database folder
-     * @param fileName The name of the CSV file
+     * Executes a write query (any Cypher) with named parameters.
+     * We do not return results: it’s meant for UNWIND/CREATE/SET statements.
+     *
+     * @param cypherQuery The parameterized Cypher (e.g. “UNWIND $batch AS row …”)
+     * @param parameters  A map of parameter names → values, to be passed to run(...)
+     */
+    public void executeWriteQuery(String cypherQuery, Map<String, Object> parameters) {
+        try (Session session = neo4jDriver.session()) {
+            session.writeTransaction(tx -> {
+                tx.run(cypherQuery, parameters);
+                return null;
+            });
+        } catch (ClientException e) {
+            throw new InvalidQueryException("Error executing write query: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Generates a CSV file from the Neo4j database and stores it inside the database folder.
+     *
+     * @param fileName The name of the CSV file (without “.csv” extension).
      */
     public void generateCSV(String fileName) {
         try (Session session = neo4jDriver.session()) {
-            String query = "CALL apoc.export.csv.all('" + properties.getRelativeExportsPath().toString() + "/" + fileName + ".csv', {})";
+            String query = "CALL apoc.export.csv.all('"
+                    + properties.getRelativeExportsPath().toString()
+                    + "/" + fileName + ".csv', {})";
             session.run(query);
         } catch (ClientException e) {
             throw new InvalidQueryException("Error Exporting to CSV! " + e.getMessage());
@@ -61,16 +82,21 @@ public class RawNeo4jService {
     }
 
     /**
-     * Generates a CSV file from a custom query and stores it inside the database folder
-     * @param fileName The name of the CSV file
-     * @param query The custom query which contains subgraph to export
+     * Generates a CSV file from a custom query and stores it inside the database folder.
+     *
+     * @param fileName The name of the CSV file (without “.csv” extension).
+     * @param query    The custom Cypher query which contains the subgraph to export.
      */
     public void generateQueryCSV(String fileName, String query) {
         try (Session session = neo4jDriver.session()) {
-            String command = "WITH \"" + query + "\" AS query\n" +
-                    "CALL apoc.export.csv.query(query, \"" + properties.getRelativeExportsPath().toString() + "/" + fileName + ".csv\", {})\n" +
-                    "YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data\n" +
-                    "RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done, data;";
+            String command =
+                    "WITH \"" + query + "\" AS query\n" +
+                            "CALL apoc.export.csv.query(query, \"" + properties.getRelativeExportsPath().toString()
+                            + "/" + fileName + ".csv\", {})\n" +
+                            "YIELD file, source, format, nodes, relationships, properties, time, rows, batchSize, " +
+                            "batches, done, data\n" +
+                            "RETURN file, source, format, nodes, relationships, properties, time, rows, batchSize, " +
+                            "batches, done, data;";
             session.run(command);
         } catch (ClientException e) {
             throw new InvalidQueryException("Error Exporting to CSV! " + e.getMessage());

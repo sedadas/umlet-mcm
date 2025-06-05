@@ -164,4 +164,25 @@ public interface GraphDBService {
      * Clears the graph database, removing all nodes, relations and attributes
      */
     void clearDatabase();
+
+    /**
+     * Given:
+     *   - a common ISO‐8601 timestamp string (e.g. "2025-05-20T14:23:45Z")
+     *   - a map from data‐source name → JSON‐typed value (Object)
+     *
+     * This method updates each matching DataSource node in Neo4j by setting
+     * two new top‐level properties on that node:
+     *   • d.dataspaceTimestamp = timestamp
+     *   • d.dataspaceValue     = value.toString()
+     *
+     * We assume each data‐source node has the label :DataSource and
+     * a “name” property exactly matching the map key.
+     *
+     * If a given name does not match any existing node, it is skipped (no error).
+     *
+     * @param timestamp    ISO‐8601 timestamp (String)
+     * @param valuesByName Map<assetName, JSON‐typed value>
+     */
+    void upsertDataspaceProperties(String timestamp, Map<String, Object> valuesByName);
+
 }
