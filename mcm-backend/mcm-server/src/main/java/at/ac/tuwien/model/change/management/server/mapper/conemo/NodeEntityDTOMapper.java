@@ -33,11 +33,7 @@ public class NodeEntityDTOMapper {
             relation.setTarget(toEntityNoRelations(targetDto.get()));
 
             //CONEMO requires an empty properties name to identify this as an Asset/Condition Relationship object.
-            var properties = new HashMap<String, Value>();
-            Value val = new StringValue("");
-            properties.put("name", val);
-
-            relation.setProperties(properties);
+            relation.setProperties(Map.of("name", new StringValue("")));
             relationEntities.add(relation);
         }
         entity.setRelations(relationEntities);
