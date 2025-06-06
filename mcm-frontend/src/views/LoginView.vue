@@ -1,23 +1,8 @@
-<template>
-  <div class="login">
-    <h2>Login</h2>
-    <form @submit.prevent="handleLogin">
-      <div>
-        <label>Email:</label>
-        <input v-model="email" type="email" required />
-      </div>
-      <div>
-        <label>Password:</label>
-        <input v-model="password" type="password" required />
-      </div>
-      <button type="submit">Login</button>
-      <p v-if="errorMessage" style="color:red">{{ errorMessage }}</p>
-    </form>
-  </div>
-</template>
+
 
 <script>
 import axios from 'axios'
+import {Button} from "@/components/ui/button";
 
 export default {
   data() {
@@ -37,11 +22,9 @@ export default {
           'Authorization': `Basic ${token}`
         }
       }).then(response => {
-        console.log(response.data)
 
         // Save token
         document.cookie = `authHeader=Basic ${token}; SameSite=Strict; path=/; max-age=86400`
-        //`Basic ${token}`
         this.$router.push('/')
       }).catch(error => {
         console.error('Auth failed:', error)
@@ -52,3 +35,34 @@ export default {
   },
 }
 </script>
+
+<template>
+  <div class="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+    <img src="/mcm.png" alt="TU Wien Logo" class="mb-3 w-48"/>
+    <h1 class="text-4xl font-semibold text-gray-800 mb-4">
+      UMLet Model Change Management
+    </h1>
+
+    <h2 class="text-4xl font-semibold text-gray-800 mb-4">
+      Login
+    </h2>
+        <form @submit.prevent="handleLogin">
+          <div>
+            <label>Email:</label>
+            <input v-model="email" placeholder="Enter your email" type="email" required />
+          </div>
+          <div>
+            <label>Password:</label>
+            <input v-model="password" placeholder="Enter your password" type="password" required />
+          </div>
+
+          <Button type="submit" class="w-full flex items-center gap-2" variant="outline">
+            Login
+          </Button>
+          <p v-if="errorMessage" style="color:red">{{ errorMessage }}</p>
+        </form>
+    <div class="flex items-center mt-3">
+      <img src="/tu_logo.svg" alt="TU Wien Logo" class="w-12 m-2"/>
+    </div>
+  </div>
+</template>

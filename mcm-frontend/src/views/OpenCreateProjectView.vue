@@ -26,6 +26,13 @@ const fetchConfigurations = async () => {
   }
 };
 
+const logout = () => {
+    document.cookie = "authHeader=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+    //TODO: This doesn't do anything for some reason
+    this.$router.push('/login');
+}
+
 // lifecycle
 /**
  * Fetch all configurations on mounted
@@ -54,6 +61,10 @@ onMounted(() => {
     </div>
     <div class="flex items-center mt-3">
       <img src="/tu_logo.svg" alt="TU Wien Logo" class="w-12 m-2"/>
+      <Button @click="logout" class="w-full flex items-center gap-2" variant="outline">
+        Logout
+      </Button>
+
       <Button @click="$router.push({ name: 'help'})" class="w-full flex items-center gap-2" variant="outline">
         <HelpCircle/>
         How to use

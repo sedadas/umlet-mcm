@@ -20,6 +20,17 @@ const routes = [
     { path: '/:pathMatch(.*)*', redirect: { name: "home" } },
 ]
 
+function getCookie(name: string): string | null {
+  const cookies = document.cookie.split('; ')
+  for (const cookie of cookies) {
+    const [key, value] = cookie.split('=')
+    if (key === name) {
+      return decodeURIComponent(value)
+    }
+  }
+  return null
+}
+
 export const router = createRouter({
     // history only works in hash mode in electron
     // cf {https://nklayman.github.io/vue-cli-plugin-electron-builder/guide/commonIssues.html#blank-screen-on-builds-but-works-fine-on-serve}
@@ -30,7 +41,7 @@ export const router = createRouter({
 router.beforeEach((to, from, next) => {
   const publicPages = ['/login']
   const authRequired = !publicPages.includes(to.path)
-  const isLoggedIn = localStorage.getItem('token')
+  const isLoggedIn = getCookie('authHeader');
 
   if (authRequired && !isLoggedIn) {
     return next('/login')
