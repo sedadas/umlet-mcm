@@ -39,8 +39,9 @@ export default {
       }).then(response => {
         console.log(response.data)
 
-        // Save token (e.g., in localStorage)
-        document.cookie = "authHeader=`Basic ${token}`; SameSite='Strict', path=/; max-age=86400"
+        // Save token
+        document.cookie = `authHeader=Basic ${token}; SameSite=Strict; path=/; max-age=86400`
+        //`Basic ${token}`
         this.$router.push('/')
       }).catch(error => {
         console.error('Auth failed:', error)
