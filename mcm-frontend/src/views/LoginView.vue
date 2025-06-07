@@ -1,8 +1,9 @@
 
 
 <script>
-import axios from 'axios'
+import axios from 'axios';
 import {Button} from "@/components/ui/button";
+import {AppConfig} from "@/config";
 
 export default {
   data() {
@@ -17,8 +18,11 @@ export default {
     async handleLogin() {
       const token = btoa(`${this.email}:${this.password}`)  // base64 encode
 
+      //TODO fix env
+      //axios.get(AppConfig.apiBaseUrl+'/api/v1/users/self', {
       axios.get('http://localhost:9081/api/v1/users/self', {
         headers: {
+          'Access-Control-Allow-Origin': '*',
           'Authorization': `Basic ${token}`
         }
       }).then(response => {

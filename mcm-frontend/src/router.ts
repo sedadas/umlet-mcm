@@ -2,12 +2,14 @@ import OpenCreateProjectView from "@/views/OpenCreateProjectView.vue";
 import MainView from "@/views/MainView.vue";
 import LoginView from '@/views/LoginView.vue';
 import HelpView from "@/views/HelpView.vue";
+import UserManagementView from '@/views/UserManagementView.vue';
 import { createRouter, createWebHashHistory, createWebHistory } from "vue-router";
 import isElectron from 'is-electron';
 
 const routes = [
     { path: '/', name: "home", component: OpenCreateProjectView },
     { path: '/login', name: "login", component: LoginView },
+    { path: '/user', name: "userManagement", component: UserManagementView },
     {
         path: '/configuration/:id',
         name: "mainview",

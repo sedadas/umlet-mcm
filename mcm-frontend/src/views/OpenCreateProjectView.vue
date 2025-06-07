@@ -1,5 +1,6 @@
 <script setup lang="ts">
 
+import { useRouter } from 'vue-router';
 import NewProjectForm from "@/components/open-create-configuration/NewProjectForm.vue";
 import ProjectList from "@/components/open-create-configuration/ProjectList.vue";
 import {onMounted, ref} from "vue";
@@ -10,7 +11,8 @@ import {Button} from "@/components/ui/button";
 
 // variables
 const configurations = ref<Configuration[]>([]);
-const errorMessage = ref<string | undefined>(undefined)
+const errorMessage = ref<string | undefined>(undefined);
+const router = useRouter();
 
 // functions
 /**
@@ -28,9 +30,7 @@ const fetchConfigurations = async () => {
 
 const logout = () => {
     document.cookie = "authHeader=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-
-    //TODO: This doesn't do anything for some reason
-    this.$router.push('/login');
+    router.push('/login');
 }
 
 // lifecycle
@@ -61,8 +61,12 @@ onMounted(() => {
     </div>
     <div class="flex items-center mt-3">
       <img src="/tu_logo.svg" alt="TU Wien Logo" class="w-12 m-2"/>
-      <Button @click="logout" class="w-full flex items-center gap-2" variant="outline">
+      <Button @click="logout()" class="w-full flex items-center gap-2" variant="outline">
         Logout
+      </Button>
+
+      <Button @click="$router.push({ name: 'userManagement'})" class="w-full flex items-center gap-2" variant="outline">
+        User Management
       </Button>
 
       <Button @click="$router.push({ name: 'help'})" class="w-full flex items-center gap-2" variant="outline">
