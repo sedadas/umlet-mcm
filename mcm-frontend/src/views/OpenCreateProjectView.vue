@@ -7,6 +7,7 @@ import {onMounted, ref} from "vue";
 import {Configuration} from "@/types/Configuration.ts";
 import {getAllConfigurations} from "@/api/configuration.ts";
 import {HelpCircle} from 'lucide-vue-next'
+import {User} from 'lucide-vue-next'
 import {Button} from "@/components/ui/button";
 
 // variables
@@ -66,6 +67,7 @@ onMounted(() => {
       </Button>
 
       <Button @click="$router.push({ name: 'userManagement'})" class="w-full flex items-center gap-2" variant="outline">
+        <User/>
         User Management
       </Button>
 

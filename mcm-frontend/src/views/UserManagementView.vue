@@ -5,7 +5,9 @@ import {HelpCircle} from 'lucide-vue-next';
 import {onMounted, ref} from "vue";
 import type {User} from "@/types/User";
 import {getAllUsers} from "@/api/user.ts";
+import {ScrollArea} from "@/components/ui/scroll-area";
 import UserView from "@/components/user-management/UserView.vue";
+import {UserPlus} from 'lucide-vue-next'
 
 
 // variables
@@ -21,7 +23,6 @@ const fetchUsers = async () => {
   try {
     users.value = await getAllUsers();
     errorMessage.value = undefined
-    console.log(users.value)
   } catch (error: any) {
     errorMessage.value = "Unable to fetch users: " + error.message
   }
@@ -59,6 +60,10 @@ onMounted(() => {
               :user="user"
           />
           </ScrollArea>
+            <Button @click="$router.push({ name: 'newUser'})" class="w-full flex items-center gap-2" variant="outline">
+              <UserPlus/>
+              Add User
+            </Button>
         </div>
     </div>
 

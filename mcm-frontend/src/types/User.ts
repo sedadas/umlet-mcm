@@ -10,3 +10,10 @@ export type User = {
     roles: UserRole[],
     privateDashboards: QueryDashboard[]
 }
+
+export type NewUser = {
+    username: string,
+    password: string,
+    roles: UserRole[],
+    privateDashboards: QueryDashboard[]
+}

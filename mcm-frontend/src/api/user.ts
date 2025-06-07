@@ -32,8 +32,6 @@ const apiClient = axios.create({
 export const getAllUsers = async (): Promise<User[]> => {
     try {
         const response = await apiClient.get('');
-        //console.log(response);
-        console.log(response.data);
         return response.data;
     } catch (error) {
         throw error;
