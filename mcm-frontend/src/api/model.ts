@@ -3,10 +3,24 @@ import { AppConfig } from "@/config";
 import {Model} from "@/types/Model.ts";
 import {Configuration} from "@/types/Configuration.ts";
 
+
+function getCookie(name: string): string | null {
+  const cookies = document.cookie.split('; ')
+  for (const cookie of cookies) {
+    const [key, value] = cookie.split('=')
+    if (key === name) {
+      return decodeURIComponent(value)
+    }
+  }
+  return null
+}
+
+
 const apiClient = axios.create({
     baseURL: AppConfig.apiBaseUrl + '/api/v1',
     headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': getCookie('authHeader')
     }
 });
 
