@@ -1,6 +1,7 @@
 package at.ac.tuwien.model.change.management.server.integration;
 
 import at.ac.tuwien.model.change.management.graphdb.dao.UserEntityDAO;
+import at.ac.tuwien.model.change.management.server.dto.QueryDashboardDTO;
 import at.ac.tuwien.model.change.management.server.dto.UserDTO;
 import com.fasterxml.jackson.databind.MappingIterator;
 import jakarta.ws.rs.core.Response;
@@ -9,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import java.util.List;
 
 import static at.ac.tuwien.model.change.management.server.Initialize.*;
 import static at.ac.tuwien.model.change.management.server.controller.Constants.USER_ENDPOINT;
@@ -257,7 +260,7 @@ class UserIntegrationTest extends Neo4jIntegrationTest {
         var user = validNonExistingUserWithoutQueryDashboards();
         try (var iterator = createUser(user)) {
             var created = iterator.next();
-            assertNull(created.privateDashboards());
+            assertTrue(created.privateDashboards().isEmpty());
         }
 
         var toUpdate = new UserDTO(
@@ -273,12 +276,115 @@ class UserIntegrationTest extends Neo4jIntegrationTest {
         }
     }
 
-    /*
-            TODO! Add tests for:
-            - Add 2 same dashboards
-            - Edit a dashboard
-            - Delete a dashboard
-     */
+    @Test
+    @DisplayName("Editing a user without dashboards updates user information")
+    void testEditUser_givenValidUser_updatesUserInformation() throws Exception {
+        var user = validNonExistingUserWithoutQueryDashboards();
+        try (var iterator = createUser(user)) { /* Empty */}
+
+        var toUpdate = new UserDTO(
+                user.username(),
+                validPassword(), //User changes their password
+                user.roles(),
+                user.privateDashboards()
+        );
+
+        try (var iterator = updateUser(toUpdate)) {
+            var updated = iterator.next();
+
+            assertEquals(toUpdate.username(), updated.username());
+            assertTrue(passEncoder.matches(toUpdate.password(), updated.password()));
+            assertNotNull(updated.privateDashboards()); //Private dashboards should never be null, but an empty list instead!
+            assertArrayEquals(toUpdate.roles().toArray(), updated.roles().toArray());
+            assertArrayEquals(toUpdate.privateDashboards().toArray(), updated.privateDashboards().toArray());
+
+            assertFalse(iterator.hasNext());
+        }
+    }
+
+    @Test
+    @DisplayName("Persisting equal dashboards is allowed.")
+    void testEditUser_givenValidUser_persistsEqualDashboards() throws Exception {
+        var user = validNonExistingUserWithoutQueryDashboards();
+        try (var iterator = createUser(user)) { /* Empty */}
+
+        var dashboard = validNonExistingQueryDashboard();
+        var dashboards = List.of(dashboard, dashboard);
+        var toUpdate = new UserDTO(
+                user.username(),
+                user.password(),
+                user.roles(),
+                dashboards
+        );
+
+        try (var iterator = updateUser(toUpdate)) {
+            var updated = iterator.next();
+            assertNotNull(updated.privateDashboards());
+            assertEquals(updated.privateDashboards().size(), dashboards.size());
+            assertArrayEquals(toUpdate.privateDashboards().toArray(), updated.privateDashboards().toArray());
+            assertFalse(iterator.hasNext());
+        }
+    }
+
+    @Test
+    @DisplayName("Editing a dashboard updates dashboard without creating new one.")
+    void testEditUser_givenValidUser_updatesDashboardWithoutCreatingNewDashboard() throws Exception {
+        var user = validNonExistingUser();
+        List<QueryDashboardDTO> dashboards;
+        try (var iterator = createUser(user)) {
+            user = iterator.next();
+            dashboards = user.privateDashboards();
+        }
+
+        var originalSize = dashboards.size();
+        var d = dashboards.getFirst();
+        var updatedD = new QueryDashboardDTO(
+            d.id(),
+            validNonExistingQueryMap()
+        );
+        dashboards.set(0, updatedD);
+
+        var updatedUser = new UserDTO(
+            user.username(),
+            user.password(),
+            user.roles(),
+            dashboards
+        );
+        try (var iterator = updateUser(updatedUser)) {
+            var updated = iterator.next();
+            assertEquals(updated.privateDashboards().size(), originalSize);
+            assertArrayEquals(updatedUser.privateDashboards().toArray(), updated.privateDashboards().toArray());
+        }
+    }
+
+    @Test
+    @DisplayName("Deleting a dashboard removes it from user dashboards.")
+    void testEditUser_givenValidUser_deletesDashboard() throws Exception {
+        var user = validNonExistingUser();
+        List<QueryDashboardDTO> dashboards;
+        try (var iterator = createUser(user)) {
+            user = iterator.next();
+            dashboards = user.privateDashboards();
+        }
+
+        var originalSize = dashboards.size();
+        var removed = dashboards.getFirst();
+        dashboards.removeFirst();
+
+        var updatedUser = new UserDTO(
+            user.username(),
+            user.password(),
+            user.roles(),
+            dashboards
+        );
+        try (var iterator = updateUser(updatedUser)) {
+            var updated = iterator.next();
+            assertEquals(updated.privateDashboards().size(), originalSize - 1);
+            assertTrue(
+                updated.privateDashboards().stream().noneMatch(d -> d.equals(removed))
+            );
+        }
+    }
 
     private MappingIterator<UserDTO> createUser(UserDTO userDTO) throws Exception {
         return mvc.postRequest(userDTO, USER_ENDPOINT, UserDTO.class);
