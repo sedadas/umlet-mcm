@@ -35,7 +35,6 @@ const fetchUserRoles = async () => {
 
 const createNewUser = async () => {
   try {
-    console.log(newUser);
     await createUser(newUser);
     console.log("test4");
     errorMessage.value = undefined

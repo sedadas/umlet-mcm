@@ -1,5 +1,5 @@
 import axios from "axios"
-import {User} from "@/types/User";
+import {NewUser, User} from "@/types/User";
 import {AppConfig} from "@/config";
 
 
@@ -32,6 +32,23 @@ const apiClient = axios.create({
 export const getAllUsers = async (): Promise<User[]> => {
     try {
         const response = await apiClient.get('');
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+/**
+ * Create a new user on the the server
+ * @param newUser: the user to be created
+ * @return the newly created user
+ */
+export const createUser = async (newUser: NewUser): Promise<User> => {
+    try {
+        console.log("test2");
+        const response = await apiClient.post('', newUser);
+        console.log("test3")
         return response.data;
     } catch (error) {
         throw error;
