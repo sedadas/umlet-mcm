@@ -10,6 +10,8 @@ import at.ac.tuwien.model.change.management.server.dto.UserDTO;
 import at.ac.tuwien.model.change.management.server.mapper.UserDtoMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,7 @@ import static at.ac.tuwien.model.change.management.server.controller.Constants.U
 @RequiredArgsConstructor
 public class UserController {
 
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
 
     private final UserDtoMapper userDtoMapper;

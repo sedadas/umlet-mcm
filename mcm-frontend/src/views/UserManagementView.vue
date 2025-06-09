@@ -49,6 +49,11 @@ onMounted(() => {
 
     <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl overflow-hidden">
       <div class="flex justify-center p-2">
+        <h1 class="text-4xl font-semibold text-gray-800 mb-4">
+          User Management
+        </h1>
+      </div>
+      <div class="flex justify-center p-2">
         <label v-if="errorMessage" class="text-sm font-medium text-red-500">{{errorMessage}}</label>
         <label v-else class="text-sm font-medium text-green-500">Database connection OK</label>
       </div>
@@ -58,6 +63,7 @@ onMounted(() => {
               v-for="user in users"
               :key="user.username"
               :user="user"
+              @click="$router.push({ name: 'editUser', params: {id: user.username}})"
           />
           </ScrollArea>
             <Button @click="$router.push({ name: 'newUser'})" class="w-full flex items-center gap-2" variant="outline">

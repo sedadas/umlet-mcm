@@ -40,16 +40,61 @@ export const getAllUsers = async (): Promise<User[]> => {
 
 
 /**
+ * Get user from the server
+ * @param id: the id of the user being requested
+ * @return the requested user
+ */
+export const getUsersById = async (id: String): Promise<NewUser> => {
+    try {
+        const response = await apiClient.get(`/${id}`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+
+/**
  * Create a new user on the the server
  * @param newUser: the user to be created
  * @return the newly created user
  */
 export const createUser = async (newUser: NewUser): Promise<User> => {
     try {
-        console.log("test2");
         const response = await apiClient.post('', newUser);
-        console.log("test3")
         return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+/**
+ * update a user on the the server
+ * @param user: the user to be updated
+ * @return the updated created user
+ */
+export const updateUser = async (user: NewUser): Promise<User> => {
+    try {
+        const response = await apiClient.put(`/${user.username}`, user);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+
+
+/**
+ * delete a user on the the server
+ * @param user: the user to be deleted
+ */
+export const deleteUser = async (id: String): Promise<void> => {
+    try {
+        const response = await apiClient.delete(`/${id}`);
+        return null;
     } catch (error) {
         throw error;
     }

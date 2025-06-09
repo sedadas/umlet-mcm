@@ -35,9 +35,7 @@ const fetchUserRoles = async () => {
 
 const createNewUser = async () => {
   try {
-    console.log(newUser);
     await createUser(newUser);
-    console.log("test4");
     errorMessage.value = undefined
     this.$router.push({ name: 'userManagement'})
   } catch (error: any) {
@@ -63,6 +61,14 @@ onMounted(() => {
     </h1>
 
     <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl overflow-hidden">
+
+
+      <div class="flex justify-center p-2">
+        <h1 class="text-4xl font-semibold text-gray-800 mb-4">
+          Create User
+        </h1>
+      </div>
+
       <div class="flex justify-center p-2">
         <label v-if="errorMessage" class="text-sm font-medium text-red-500">{{errorMessage}}</label>
         <label v-else class="text-sm font-medium text-green-500">Database connection OK</label>

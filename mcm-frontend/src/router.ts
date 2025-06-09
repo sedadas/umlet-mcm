@@ -4,6 +4,7 @@ import LoginView from '@/views/LoginView.vue';
 import HelpView from "@/views/HelpView.vue";
 import UserManagementView from '@/views/UserManagementView.vue';
 import NewUserView from '@/views/NewUserView.vue';
+import EditUserView from '@/views/EditUserView.vue';
 import { createRouter, createWebHashHistory, createWebHistory } from "vue-router";
 import isElectron from 'is-electron';
 
@@ -12,6 +13,14 @@ const routes = [
     { path: '/login', name: "login", component: LoginView },
     { path: '/user', name: "userManagement", component: UserManagementView },
     { path: '/newUser', name: "newUser", component: NewUserView },
+    {
+        path: '/editUser/:id',
+        name: "editUser",
+        component: EditUserView,
+        props: (route:any) => ({
+            id: route.params.id
+        }),
+    },
     {
         path: '/configuration/:id',
         name: "mainview",

@@ -3,8 +3,8 @@ import {Button} from "@/components/ui/button";
 import {HelpCircle} from 'lucide-vue-next';
 import type {NewUser, UserRole} from "@/types/User";
 import {getAllUserRoles} from "@/api/userRole.ts";
-import {createUser} from "@/api/user.ts";
-import {User as UserIcon} from 'lucide-vue-next'
+import {updateUser, getUsersById} from "@/api/user.ts";
+import {User as UserIcon, UserMinus, UserPlus} from 'lucide-vue-next'
 import {onMounted, ref} from "vue";
 import Multiselect from 'vue-multiselect'
 
@@ -12,7 +12,7 @@ import Multiselect from 'vue-multiselect'
 
 
 const errorMessage = ref<string | undefined>(undefined);
-const newUser = ref<NewUser>({
+const user = ref<NewUser>({
   username: '',
   password: '',
   roles: []
@@ -33,12 +33,19 @@ const fetchUserRoles = async () => {
   }
 };
 
-const createNewUser = async () => {
+const fetchUser = async () => {
   try {
-    await createUser(newUser);
-    console.log("test4");
+    user.value = await getUsersById(route.params.id as string);
     errorMessage.value = undefined
-    this.$router.push({ name: 'userManagement'})
+  } catch (error: any) {
+    errorMessage.value = "Unable to fetch: " + error.message
+  }
+};
+
+const updateUser = async () => {
+  try {
+    user = await updateUser(user);
+    errorMessage.value = undefined
   } catch (error: any) {
     errorMessage.value = "Unable to create user: " + error.message
   }
@@ -49,8 +56,9 @@ const createNewUser = async () => {
  * Fetch all user Roles on mounted
  */
 onMounted(() => {
-  errorMessage.value = undefined
+  errorMessage.value = undefined;
   fetchUserRoles();
+  fetchUser();
 });
 
 </script>
@@ -62,23 +70,32 @@ onMounted(() => {
     </h1>
 
     <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl overflow-hidden">
+
+
+      <div class="flex justify-center p-2">
+        <h1 class="text-4xl font-semibold text-gray-800 mb-4">
+          Edit User
+        </h1>
+      </div>
+
+
       <div class="flex justify-center p-2">
         <label v-if="errorMessage" class="text-sm font-medium text-red-500">{{errorMessage}}</label>
         <label v-else class="text-sm font-medium text-green-500">Database connection OK</label>
       </div>
 
-      <form @submit.prevent="createNewUser">
+      <form @submit.prevent="updateUser">
         <div>
           <label>Email:</label>
-          <input v-model.trim="newUser.username" placeholder="Enter your email" type="email" required />
+          <input v-model.trim="user.username" placeholder="Enter your email" type="email" required />
         </div>
         <div>
           <label>Password:</label>
-          <input v-model.trim="newUser.password" placeholder="Enter your password" type="password" required />
+          <input v-model.trim="user.password" placeholder="Enter your password" type="password" required />
         </div>
 
         <div>
-          <multiselect id="multiselect" v-model="newUser.roles" :options="userRoles" :multiple="true" :close-on-select="false" :clear-on-select="false"
+          <multiselect id="multiselect" v-model="user.roles" :options="userRoles" :multiple="true" :close-on-select="false" :clear-on-select="false"
                        :preserve-search="true" placeholder="User Roles" track-by="name" label="name" :preselect-first="true">
             <template #selection="{ values, search, isOpen }">
               <span class="multiselect__single"
@@ -87,14 +104,19 @@ onMounted(() => {
             </template>
           </multiselect>
 
-          <label v-for="role in newUser.roles" :key="role.name">
+          <label v-for="role in user.roles" :key="role.name">
             {{ role.name }} {{ role.permissions }}
           </label>
         </div>
 
 
         <Button type="submit" class="w-full flex items-center gap-2" variant="outline">
-          Create User
+          <UserPlus/>
+          Update User
+        </Button>
+        <Button @click="" class="w-full flex items-center gap-2" variant="outline">
+          <UserMinus/>
+          Delete User
         </Button>
       </form>
 
