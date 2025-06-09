@@ -273,6 +273,13 @@ class UserIntegrationTest extends Neo4jIntegrationTest {
         }
     }
 
+    /*
+            TODO! Add tests for:
+            - Add 2 same dashboards
+            - Edit a dashboard
+            - Delete a dashboard
+     */
+
     private MappingIterator<UserDTO> createUser(UserDTO userDTO) throws Exception {
         return mvc.postRequest(userDTO, USER_ENDPOINT, UserDTO.class);
     }

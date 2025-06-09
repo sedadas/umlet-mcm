@@ -46,6 +46,7 @@ public class UserServiceTest {
         userEntity = new UserEntity();
         userEntity.setUsername(user.getUsername());
         userEntity.setPassword(hashPassword(user.getPassword()));
+        userEntity.setPrivateDashboards(List.of());
     }
 
     @AfterEach
@@ -123,6 +124,7 @@ public class UserServiceTest {
     @Test
     public void testUpdateUser_givenValidUser_shouldReturnUser() {
         Mockito.when(userEntityDAO.existsById(user.getUsername())).thenReturn(true);
+        Mockito.when(userEntityDAO.findById(user.getUsername())).thenReturn(Optional.ofNullable(userEntity));
         Mockito.when(userEntityMapper.toEntity(user)).thenReturn(userEntity);
 
         user.setPassword("Admin1234!");

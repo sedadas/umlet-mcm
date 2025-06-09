@@ -5,6 +5,7 @@ import at.ac.tuwien.model.change.management.core.exception.UserNotFoundException
 import at.ac.tuwien.model.change.management.core.exception.UserValidationException;
 import at.ac.tuwien.model.change.management.core.mapper.neo4j.UserEntityMapper;
 import at.ac.tuwien.model.change.management.core.model.User;
+import at.ac.tuwien.model.change.management.graphdb.dao.QueryDashboardEntityDAO;
 import at.ac.tuwien.model.change.management.graphdb.dao.UserEntityDAO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
+
     private final UserEntityDAO userRepository;
+    private final QueryDashboardEntityDAO dashboardRepository;
     private final UserEntityMapper userEntityMapper;
 
     @Override
@@ -56,7 +59,25 @@ public class UserServiceImpl implements UserService {
         }
         validateUser(newUser);
         var userEntity = userEntityMapper.toEntity(newUser);
-        userEntity.setPassword(new BCryptPasswordEncoder().encode((newUser.getPassword())));
+
+        //When updating dashboards from CONEMO, password is null.
+        //Copy the existing password so that it is not changed!
+        if (newUser.getPassword() == null)
+            userEntity.setPassword(userRepository.findById(newUser.getUsername()).get().getPassword());
+        else
+            userEntity.setPassword(new BCryptPasswordEncoder().encode((newUser.getPassword())));
+
+        //Composite properties don't get deleted when updating their parent entities -
+        //they need to be explicitly set to null to be deleted.
+        //Delete all existing private dashboards and save the new ones in their place.
+        var newDashboards = newUser.getPrivateDashboards();
+        var savedUser = userRepository.findById(newUser.getUsername()).get();
+        for (var dashboard : savedUser.getPrivateDashboards()) {
+            //Delete dashboards that no longer exist for this user.
+            if (newDashboards.stream().noneMatch(d -> d.getId().equals(dashboard.getId())))
+                dashboardRepository.deleteById(dashboard.getId());
+        }
+
         return userEntityMapper.fromEntity(userRepository.save(userEntity));
     }
 
@@ -83,6 +104,13 @@ public class UserServiceImpl implements UserService {
          */
         final String pattern = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!?@#$%^&+=_])(?=\\S+$).{8,}";
 
+        if (user.getPassword() == null) {
+            //If password is null, this means that the CONEMO backend is changing some propertes of the user
+            //that are not their credentials (e.g., dashboards).
+            //This is done for safety, as otherwise the user password would also need to be saved
+            //in the CONEMO backend.
+            return;
+        }
         if(user.getPassword().isEmpty() || !user.getPassword().matches(pattern)) {
             throw new UserValidationException("Password does not adhere to the password policy");
         }
