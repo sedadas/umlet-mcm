@@ -6,11 +6,9 @@ import org.mapstruct.Mapper;
 
 import java.util.List;
 
-//@Mapper(componentModel = "spring", uses = {QueryDashboardDtoMapperImpl.class})
+@Mapper(componentModel = "spring")
 public interface QueryDashboardDtoMapper {
     QueryDashboardDTO toDto(QueryDashboard queryDashboard);
-
     QueryDashboard fromDto(QueryDashboardDTO queryDashboardDTO);
-
     List<QueryDashboardDTO> toDTOs(List<QueryDashboard> queryDashboards);
 }

@@ -89,7 +89,7 @@ public class TestData {
                 validNonExistingUsername(),
                 validPassword(),
                 validNonExistingRoles(),
-                null
+                List.of()
         );
     }
 
