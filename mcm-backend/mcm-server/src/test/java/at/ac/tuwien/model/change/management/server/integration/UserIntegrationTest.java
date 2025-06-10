@@ -339,7 +339,7 @@ class UserIntegrationTest extends Neo4jIntegrationTest {
         var originalSize = dashboards.size();
         var d = dashboards.getFirst();
         var updatedD = new QueryDashboardDTO(
-            d.id(),
+            d.name(),
             validNonExistingQueryMap()
         );
         dashboards.set(0, updatedD);

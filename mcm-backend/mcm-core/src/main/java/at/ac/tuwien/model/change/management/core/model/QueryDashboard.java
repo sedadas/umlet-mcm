@@ -10,6 +10,6 @@ import java.util.Map;
 @Setter
 @EqualsAndHashCode
 public class QueryDashboard {
-    private String id;
+    private String name;
     private Map<String, String> query;
 }

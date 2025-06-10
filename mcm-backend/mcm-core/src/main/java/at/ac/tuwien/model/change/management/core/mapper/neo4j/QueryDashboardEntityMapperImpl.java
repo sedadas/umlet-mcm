@@ -20,7 +20,7 @@ public class QueryDashboardEntityMapperImpl implements QueryDashboardEntityMappe
 
         var entity = new QueryDashboardEntity();
 
-        entity.setId(queryDashboard.getId());
+        entity.setName(queryDashboard.getName());
         entity.setQuery(queryDashboard.getQuery());
 
         return entity;
@@ -33,7 +33,7 @@ public class QueryDashboardEntityMapperImpl implements QueryDashboardEntityMappe
 
         var dto = new QueryDashboard();
 
-        dto.setId(queryDashboardEntity.getId());
+        dto.setName(queryDashboardEntity.getName());
         dto.setQuery(queryDashboardEntity.getQuery());
 
         return dto;
