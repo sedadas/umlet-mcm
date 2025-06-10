@@ -74,8 +74,8 @@ public class UserServiceImpl implements UserService {
         var savedUser = userRepository.findById(newUser.getUsername()).get();
         for (var dashboard : savedUser.getPrivateDashboards()) {
             //Delete dashboards that no longer exist for this user.
-            if (newDashboards.stream().noneMatch(d -> d.getId().equals(dashboard.getId())))
-                dashboardRepository.deleteById(dashboard.getId());
+            if (newDashboards.stream().noneMatch(d -> d.getName().equals(dashboard.getName())))
+                dashboardRepository.deleteById(dashboard.getName());
         }
 
         return userEntityMapper.fromEntity(userRepository.save(userEntity));
