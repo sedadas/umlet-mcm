@@ -2,13 +2,13 @@
 import axios from 'axios';
 import {Button} from "@/components/ui/button";
 import {HelpCircle} from 'lucide-vue-next';
+import {User as UserIcon} from 'lucide-vue-next'
 import {onMounted, ref} from "vue";
 import type {User} from "@/types/User";
 import {getAllUsers} from "@/api/user.ts";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import UserView from "@/components/user-management/UserView.vue";
 import {UserPlus} from 'lucide-vue-next'
-
 
 // variables
 const errorMessage = ref<string | undefined>(undefined);
@@ -75,8 +75,21 @@ onMounted(() => {
 
     <div class="flex items-center mt-3">
       <img src="/tu_logo.svg" alt="TU Wien Logo" class="w-12 m-2"/>
+      <Button @click="logout()" class="w-full flex items-center gap-2" variant="outline">
+        Logout
+      </Button>
+
       <Button @click="$router.push({ name: 'home'})" class="w-full flex items-center gap-2" variant="outline">
         Home
+      </Button>
+
+      <Button @click="$router.push({ name: 'userManagement'})" class="w-full flex items-center gap-2" variant="outline">
+        <UserIcon/>
+        User Management
+      </Button>
+
+      <Button @click="$router.push({ name: 'userRoleManagement'})" class="w-full flex items-center gap-2" variant="outline">
+        Role Management
       </Button>
 
       <Button @click="$router.push({ name: 'help'})" class="w-full flex items-center gap-2" variant="outline">

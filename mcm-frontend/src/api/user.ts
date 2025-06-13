@@ -89,7 +89,7 @@ export const updateUser = async (user: NewUser): Promise<User> => {
 
 /**
  * delete a user on the the server
- * @param user: the user to be deleted
+ * @param id: the user to be deleted
  */
 export const deleteUser = async (id: String): Promise<void> => {
     try {

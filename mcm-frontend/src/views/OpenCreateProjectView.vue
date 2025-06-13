@@ -66,9 +66,17 @@ onMounted(() => {
         Logout
       </Button>
 
+      <Button @click="$router.push({ name: 'home'})" class="w-full flex items-center gap-2" variant="outline">
+        Home
+      </Button>
+
       <Button @click="$router.push({ name: 'userManagement'})" class="w-full flex items-center gap-2" variant="outline">
         <User/>
         User Management
+      </Button>
+
+      <Button @click="$router.push({ name: 'userRoleManagement'})" class="w-full flex items-center gap-2" variant="outline">
+        Role Management
       </Button>
 
       <Button @click="$router.push({ name: 'help'})" class="w-full flex items-center gap-2" variant="outline">

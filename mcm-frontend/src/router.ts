@@ -3,7 +3,9 @@ import MainView from "@/views/MainView.vue";
 import LoginView from '@/views/LoginView.vue';
 import HelpView from "@/views/HelpView.vue";
 import UserManagementView from '@/views/UserManagementView.vue';
+import UserRoleManagementView from '@/views/UserRoleManagementView.vue';
 import NewUserView from '@/views/NewUserView.vue';
+import NewUserRoleView from '@/views/NewUserRoleView.vue';
 import EditUserView from '@/views/EditUserView.vue';
 import { createRouter, createWebHashHistory, createWebHistory } from "vue-router";
 import isElectron from 'is-electron';
@@ -21,6 +23,8 @@ const routes = [
             id: route.params.id
         }),
     },
+    { path: '/role', name: "userRoleManagement", component: UserRoleManagementView },
+    { path: '/newRole', name: "newRole", component: NewUserRoleView },
     {
         path: '/configuration/:id',
         name: "mainview",

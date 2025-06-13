@@ -124,6 +124,10 @@ onMounted(() => {
 
     <div class="flex items-center mt-3">
       <img src="/tu_logo.svg" alt="TU Wien Logo" class="w-12 m-2"/>
+      <Button @click="logout()" class="w-full flex items-center gap-2" variant="outline">
+        Logout
+      </Button>
+
       <Button @click="$router.push({ name: 'home'})" class="w-full flex items-center gap-2" variant="outline">
         Home
       </Button>
@@ -131,6 +135,10 @@ onMounted(() => {
       <Button @click="$router.push({ name: 'userManagement'})" class="w-full flex items-center gap-2" variant="outline">
         <UserIcon/>
         User Management
+      </Button>
+
+      <Button @click="$router.push({ name: 'userRoleManagement'})" class="w-full flex items-center gap-2" variant="outline">
+        Role Management
       </Button>
 
       <Button @click="$router.push({ name: 'help'})" class="w-full flex items-center gap-2" variant="outline">
