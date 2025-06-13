@@ -16,9 +16,9 @@ function getCookie(name: string): string | null {
 }
 
 const apiClient = axios.create({
-    baseURL: 'http://localhost:9081/api/v1/roles',
+    //baseURL: 'http://localhost:9081/api/v1/roles',
     //TODO fix env
-    //baseURL: AppConfig.apiBaseUrl + '/api/v1/roles',
+    baseURL: AppConfig.apiBaseUrl + '/api/v1/roles',
     headers: {
         'Content-Type': 'application/json',
         'Authorization': getCookie('authHeader')
@@ -46,7 +46,7 @@ export const getAllUserRoles = async (): Promise<UserRole[]> => {
  * @param id: the id of the role being requested
  * @return the requested role
  */
-export const getUsersById = async (id: String): Promise<NewUser> => {
+export const getUserRolesById = async (id: String): Promise<NewUser> => {
     try {
         const response = await apiClient.get(`/${id}`);
         return response.data;

@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import {Button} from "@/components/ui/button";
-import {HelpCircle} from 'lucide-vue-next';
-import type {NewUser, UserRole} from "@/types/User";
-import {getAllUserRoles} from "@/api/userRole.ts";
-import {createUser} from "@/api/user.ts";
-import {User as UserIcon} from 'lucide-vue-next'
+import type {UserRole} from "@/types/User";
+import {getUserRolesById, updateRole, deleteRole} from "@/api/userRole.ts";
+import {HelpCircle} from 'lucide-vue-next'
+import {User} from 'lucide-vue-next'
 import {onMounted, ref} from "vue";
 import Multiselect from 'vue-multiselect'
 import { useRouter } from 'vue-router';
@@ -14,50 +13,56 @@ const router = useRouter();
 
 
 const errorMessage = ref<string | undefined>(undefined);
-const newUser = ref<NewUser>({
-  username: '',
-  password: '',
-  roles: []
+const newUserRole = ref<UserRole>({
+  name: '',
+  permissions: ['']
 });
-const userRoles = ref<UserRole[]>([]);
 
 // functions
 /**
  * Fetch all user Roles
  * Uses the getAllUserRoles function from the user API
  */
-const fetchUserRoles = async () => {
+const updateNewUserRole = async () => {
   try {
-    userRoles.value = await getAllUserRoles();
+    await updateRole(newUserRole);
+    errorMessage.value = undefined
+    this.$router.push({ name: 'userRoleManagement'})
+  } catch (error: any) {
+    errorMessage.value = "Unable to update role: " + error.message
+  }
+};
+
+const fetchUserRole = async () => {
+  try {
+    newUserRole.value = await getUserRolesById(route.params.id as string);
     errorMessage.value = undefined
   } catch (error: any) {
     errorMessage.value = "Unable to fetch user Roles: " + error.message
   }
 };
 
+
 const logout = () => {
     document.cookie = "authHeader=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     router.push('/login');
 };
 
-const createNewUser = async () => {
-  try {
-    await createUser(newUser);
-    errorMessage.value = undefined
-    this.$router.push({ name: 'userManagement'})
-  } catch (error: any) {
-    errorMessage.value = "Unable to create user: " + error.message
+const checkToAddNewInput = (index) => {
+  if (index === newUserRole.value.permissions.length - 1 && newUserRole.value.permissions[index].trim() !== '') {
+    newUserRole.value.permissions.push('');
   }
 };
-
 // lifecycle
 /**
  * Fetch all user Roles on mounted
  */
 onMounted(() => {
-  errorMessage.value = undefined
-  fetchUserRoles();
+  errorMessage.value = undefined;
+  fetchUserRole();
 });
+
+
 
 </script>
 <template>
@@ -72,7 +77,7 @@ onMounted(() => {
 
       <div class="flex justify-center p-2">
         <h1 class="text-4xl font-semibold text-gray-800 mb-4">
-          Create User
+          Update User Role
         </h1>
       </div>
 
@@ -81,34 +86,25 @@ onMounted(() => {
         <label v-else class="text-sm font-medium text-green-500">Database connection OK</label>
       </div>
 
-      <form @submit.prevent="createNewUser">
+      <form @submit.prevent="updateNewUserRole">
         <div>
-          <label>Email:</label>
-          <input v-model.trim="newUser.username" placeholder="Enter your email" type="email" required />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input v-model.trim="newUser.password" placeholder="Enter your password" type="password" required />
+          <label>Name:</label>
+          <input v-model.trim="newUserRole.name" placeholder="Enter Role Name" type="text" required />
         </div>
 
-        <div>
-          <multiselect id="multiselect" v-model="newUser.roles" :options="userRoles" :multiple="true" :close-on-select="false" :clear-on-select="false"
-                       :preserve-search="true" placeholder="User Roles" track-by="name" label="name" :preselect-first="true">
-            <template #selection="{ values, search, isOpen }">
-              <span class="multiselect__single"
-                    v-if="values.length"
-                    v-show="!isOpen">{{ values.length}} options selected</span>
-            </template>
-          </multiselect>
+        <label>Permissions:</label>
 
-          <label v-for="role in newUser.roles" :key="role.name">
-            {{ role.name }} {{ role.permissions }}
-          </label>
+        <div v-for="(permission, index) in newUserRole.permissions" :key="index">
+          <input
+            type="text"
+            v-model="newUserRole.permissions[index]"
+            @input="checkToAddNewInput(index)"
+            placeholder="Enter text"
+          />
         </div>
-
 
         <Button type="submit" class="w-full flex items-center gap-2" variant="outline">
-          Create User
+          Upate User Role
         </Button>
       </form>
 
@@ -125,7 +121,7 @@ onMounted(() => {
       </Button>
 
       <Button @click="$router.push({ name: 'userManagement'})" class="w-full flex items-center gap-2" variant="outline">
-        <UserIcon/>
+        <User/>
         User Management
       </Button>
 

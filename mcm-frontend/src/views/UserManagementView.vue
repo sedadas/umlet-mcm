@@ -9,6 +9,8 @@ import {getAllUsers} from "@/api/user.ts";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import UserView from "@/components/user-management/UserView.vue";
 import {UserPlus} from 'lucide-vue-next'
+import { useRouter } from 'vue-router';
+const router = useRouter();
 
 // variables
 const errorMessage = ref<string | undefined>(undefined);
@@ -26,6 +28,10 @@ const fetchUsers = async () => {
   } catch (error: any) {
     errorMessage.value = "Unable to fetch users: " + error.message
   }
+};
+const logout = () => {
+    document.cookie = "authHeader=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    router.push('/login');
 };
 
 // lifecycle

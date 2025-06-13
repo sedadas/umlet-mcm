@@ -7,6 +7,8 @@ import {updateUser, getUsersById} from "@/api/user.ts";
 import {User as UserIcon, UserMinus, UserPlus} from 'lucide-vue-next'
 import {onMounted, ref} from "vue";
 import Multiselect from 'vue-multiselect'
+import { useRouter } from 'vue-router';
+const router = useRouter();
 
 
 
@@ -31,6 +33,11 @@ const fetchUserRoles = async () => {
   } catch (error: any) {
     errorMessage.value = "Unable to fetch user Roles: " + error.message
   }
+};
+
+const logout = () => {
+    document.cookie = "authHeader=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    router.push('/login');
 };
 
 const fetchUser = async () => {

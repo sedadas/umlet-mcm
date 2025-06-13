@@ -32,7 +32,7 @@ const fetchConfigurations = async () => {
 const logout = () => {
     document.cookie = "authHeader=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     router.push('/login');
-}
+};
 
 // lifecycle
 /**

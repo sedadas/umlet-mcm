@@ -8,6 +8,8 @@ import {ScrollArea} from "@/components/ui/scroll-area";
 import UserRoleView from "@/components/user-management/UserRoleView.vue";
 import {HelpCircle} from 'lucide-vue-next'
 import {User} from 'lucide-vue-next'
+import { useRouter } from 'vue-router';
+const router = useRouter();
 
 
 // variables
@@ -26,6 +28,10 @@ const fetchUserRoles = async () => {
   } catch (error: any) {
     errorMessage.value = "Unable to fetch user Roles: " + error.message
   }
+};
+const logout = () => {
+    document.cookie = "authHeader=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    router.push('/login');
 };
 
 // lifecycle
@@ -63,7 +69,7 @@ onMounted(() => {
               v-for="role in userRoles"
               :key="role.name"
               :userRole="role"
-              @click="$router.push({ name: 'editUser', params: {id: user.username}})"
+              @click="$router.push({ name: 'editRole', params: {id: role.name}})"
           />
           </ScrollArea>
             <Button @click="$router.push({ name: 'newRole'})" class="w-full flex items-center gap-2" variant="outline">

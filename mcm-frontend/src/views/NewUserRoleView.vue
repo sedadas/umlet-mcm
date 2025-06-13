@@ -6,6 +6,8 @@ import {HelpCircle} from 'lucide-vue-next'
 import {User} from 'lucide-vue-next'
 import {onMounted, ref} from "vue";
 import Multiselect from 'vue-multiselect'
+import { useRouter } from 'vue-router';
+const router = useRouter();
 
 
 
@@ -13,7 +15,7 @@ import Multiselect from 'vue-multiselect'
 const errorMessage = ref<string | undefined>(undefined);
 const newUserRole = ref<UserRole>({
   name: '',
-  permissions: []
+  permissions: ['']
 });
 
 // functions
@@ -21,8 +23,6 @@ const newUserRole = ref<UserRole>({
  * Fetch all user Roles
  * Uses the getAllUserRoles function from the user API
  */
-
-
 const createNewUserRole = async () => {
   try {
     await createRole(newUserRole);
@@ -33,6 +33,24 @@ const createNewUserRole = async () => {
   }
 };
 
+const logout = () => {
+    document.cookie = "authHeader=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    router.push('/login');
+};
+
+const checkToAddNewInput = (index) => {
+  if (index === newUserRole.value.permissions.length - 1 && newUserRole.value.permissions[index].trim() !== '') {
+    newUserRole.value.permissions.push('');
+  }
+};
+
+// lifecycle
+/**
+ * Fetch all user Roles on mounted
+ */
+onMounted(() => {
+  errorMessage.value = undefined;
+});
 
 </script>
 <template>
@@ -60,6 +78,17 @@ const createNewUserRole = async () => {
         <div>
           <label>Name:</label>
           <input v-model.trim="newUserRole.name" placeholder="Enter Role Name" type="text" required />
+        </div>
+
+        <label>Permissions:</label>
+
+        <div v-for="(permission, index) in newUserRole.permissions" :key="index">
+          <input
+            type="text"
+            v-model="newUserRole.permissions[index]"
+            @input="checkToAddNewInput(index)"
+            placeholder="Enter text"
+          />
         </div>
 
         <Button type="submit" class="w-full flex items-center gap-2" variant="outline">

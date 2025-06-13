@@ -7,6 +7,7 @@ import UserRoleManagementView from '@/views/UserRoleManagementView.vue';
 import NewUserView from '@/views/NewUserView.vue';
 import NewUserRoleView from '@/views/NewUserRoleView.vue';
 import EditUserView from '@/views/EditUserView.vue';
+import EditUserRoleView from '@/views/EditUserRoleView.vue';
 import { createRouter, createWebHashHistory, createWebHistory } from "vue-router";
 import isElectron from 'is-electron';
 
@@ -25,6 +26,15 @@ const routes = [
     },
     { path: '/role', name: "userRoleManagement", component: UserRoleManagementView },
     { path: '/newRole', name: "newRole", component: NewUserRoleView },
+
+    {
+        path: '/editRole/:id',
+        name: "editRole",
+        component: EditUserRoleView,
+        props: (route:any) => ({
+            id: route.params.id
+        }),
+    },
     {
         path: '/configuration/:id',
         name: "mainview",
