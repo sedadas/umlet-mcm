@@ -20,6 +20,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    needs: [test]
     steps:
     - uses: actions/checkout@v4
     - name: Install devbox  
