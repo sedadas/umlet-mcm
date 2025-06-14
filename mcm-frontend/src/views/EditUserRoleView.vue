@@ -6,11 +6,10 @@ import {HelpCircle} from 'lucide-vue-next'
 import {User} from 'lucide-vue-next'
 import {onMounted, ref} from "vue";
 import Multiselect from 'vue-multiselect'
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
+
 const router = useRouter();
-
-
-
+const route = useRoute();
 
 const errorMessage = ref<string | undefined>(undefined);
 const newUserRole = ref<UserRole>({
@@ -25,9 +24,9 @@ const newUserRole = ref<UserRole>({
  */
 const updateNewUserRole = async () => {
   try {
-    await updateRole(newUserRole);
+    await updateRole(newUserRole.value);
     errorMessage.value = undefined
-    this.$router.push({ name: 'userRoleManagement'})
+    router.push({ name: 'userRoleManagement'})
   } catch (error: any) {
     errorMessage.value = "Unable to update role: " + error.message
   }
@@ -38,9 +37,23 @@ const fetchUserRole = async () => {
     newUserRole.value = await getUserRolesById(route.params.id as string);
     errorMessage.value = undefined
   } catch (error: any) {
-    errorMessage.value = "Unable to fetch user Roles: " + error.message
+    errorMessage.value = "Unable to fetch role: " + error.message
   }
 };
+
+const removeRole = async (roleName) => {
+  try {
+    const confirmed = confirm("Are you sure?");
+    if(confirmed) {
+      await deleteRole(roleName as string);
+      errorMessage.value = undefined
+      router.push({ name: 'userRoleManagement'})
+    }
+  } catch (error: any) {
+    errorMessage.value = "Unable to delete role: " + error.message
+  }
+};
+
 
 
 const logout = () => {
@@ -107,7 +120,9 @@ onMounted(() => {
           Upate User Role
         </Button>
       </form>
-
+      <Button @click="removeRole(newUserRole.name)" class="w-full flex items-center gap-2" variant="outline">
+        Delete User Role
+      </Button>
     </div>
 
     <div class="flex items-center mt-3">

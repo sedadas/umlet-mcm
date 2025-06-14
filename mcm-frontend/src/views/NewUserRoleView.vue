@@ -25,9 +25,9 @@ const newUserRole = ref<UserRole>({
  */
 const createNewUserRole = async () => {
   try {
-    await createRole(newUserRole);
+    await createRole(newUserRole.value);
     errorMessage.value = undefined
-    this.$router.push({ name: 'userRoleManagement'})
+    router.push({ name: 'userRoleManagement'})
   } catch (error: any) {
     errorMessage.value = "Unable to create role: " + error.message
   }

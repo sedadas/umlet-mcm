@@ -16,8 +16,6 @@ function getCookie(name: string): string | null {
 }
 
 const apiClient = axios.create({
-    //baseURL: 'http://localhost:9081/api/v1/roles',
-    //TODO fix env
     baseURL: AppConfig.apiBaseUrl + '/api/v1/roles',
     headers: {
         'Content-Type': 'application/json',
@@ -64,6 +62,7 @@ export const getUserRolesById = async (id: String): Promise<NewUser> => {
  */
 export const createRole = async (role: UserRole): Promise<UserRole> => {
     try {
+        role.permissions = role.permissions.filter(perms => perms !== "");
         const response = await apiClient.post('', role);
         return response.data;
     } catch (error) {
@@ -79,7 +78,8 @@ export const createRole = async (role: UserRole): Promise<UserRole> => {
  */
 export const updateRole = async (role: UserRole): Promise<UserRole> => {
     try {
-        const response = await apiClient.put(`/${role.name}`, role);
+        role.permissions = role.permissions.filter(perms => perms !== "");
+        const response = await apiClient.put('', role);
         return response.data;
     } catch (error) {
         throw error;

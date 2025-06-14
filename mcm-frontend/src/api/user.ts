@@ -16,8 +16,6 @@ function getCookie(name: string): string | null {
 }
 
 const apiClient = axios.create({
-    //baseURL: 'http://localhost:9081/api/v1/users',
-    //TODO fix env
     baseURL: AppConfig.apiBaseUrl + '/api/v1/users',
     headers: {
         'Content-Type': 'application/json',

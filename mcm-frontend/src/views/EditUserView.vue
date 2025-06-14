@@ -3,18 +3,20 @@ import {Button} from "@/components/ui/button";
 import {HelpCircle} from 'lucide-vue-next';
 import type {NewUser, UserRole} from "@/types/User";
 import {getAllUserRoles} from "@/api/userRole.ts";
-import {updateUser, getUsersById} from "@/api/user.ts";
+import {updateUser, getUsersById, deleteUser} from "@/api/user.ts";
 import {User as UserIcon, UserMinus, UserPlus} from 'lucide-vue-next'
 import {onMounted, ref} from "vue";
 import Multiselect from 'vue-multiselect'
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
+
 const router = useRouter();
+const route = useRoute();
 
 
 
 
 const errorMessage = ref<string | undefined>(undefined);
-const user = ref<NewUser>({
+let user = ref<NewUser>({
   username: '',
   password: '',
   roles: []
@@ -49,12 +51,25 @@ const fetchUser = async () => {
   }
 };
 
-const updateUser = async () => {
+const patchUser = async () => {
   try {
     user = await updateUser(user);
     errorMessage.value = undefined
   } catch (error: any) {
-    errorMessage.value = "Unable to create user: " + error.message
+    errorMessage.value = "Unable to update user: " + error.message
+  }
+};
+
+const removeUser = async (username) => {
+  try {
+    const confirmed = confirm("Are you sure?");
+    if(confirmed) {
+      await deleteUser(username as string);
+      errorMessage.value = undefined
+      router.push({ name: 'userManagement'})
+    }
+  } catch (error: any) {
+    errorMessage.value = "Unable to delete user: " + error.message
   }
 };
 
@@ -91,7 +106,7 @@ onMounted(() => {
         <label v-else class="text-sm font-medium text-green-500">Database connection OK</label>
       </div>
 
-      <form @submit.prevent="updateUser">
+      <form @submit.prevent="patchUser">
         <div>
           <label>Email:</label>
           <input v-model.trim="user.username" placeholder="Enter your email" type="email" required />
@@ -121,11 +136,11 @@ onMounted(() => {
           <UserPlus/>
           Update User
         </Button>
-        <Button @click="" class="w-full flex items-center gap-2" variant="outline">
-          <UserMinus/>
-          Delete User
-        </Button>
       </form>
+      <Button @click="removeUser(user.username)" class="w-full flex items-center gap-2" variant="outline">
+        <UserMinus/>
+        Delete User
+      </Button>
 
     </div>
 

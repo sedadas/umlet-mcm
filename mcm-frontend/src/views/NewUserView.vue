@@ -42,9 +42,9 @@ const logout = () => {
 
 const createNewUser = async () => {
   try {
-    await createUser(newUser);
+    await createUser(newUser.value);
     errorMessage.value = undefined
-    this.$router.push({ name: 'userManagement'})
+    router.push({ name: 'userManagement'})
   } catch (error: any) {
     errorMessage.value = "Unable to create user: " + error.message
   }

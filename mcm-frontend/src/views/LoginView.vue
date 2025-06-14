@@ -18,9 +18,7 @@ export default {
     async handleLogin() {
       const token = btoa(`${this.email}:${this.password}`)  // base64 encode
 
-      //TODO fix env
       axios.get(AppConfig.apiBaseUrl+'/api/v1/users/self', {
-      //axios.get('http://localhost:9081/api/v1/users/self', {
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Authorization': `Basic ${token}`
