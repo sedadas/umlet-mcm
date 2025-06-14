@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {UserRoleDtoMapper.class, QueryDashboardDtoMapperImpl.class})
+@Mapper(componentModel = "spring", uses = {UserRoleDtoMapper.class, QueryDashboardDtoMapper.class})
 public interface UserDtoMapper {
     UserDTO toDto(User user);
 

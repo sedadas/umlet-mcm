@@ -4,12 +4,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
 @EqualsAndHashCode
 public class QueryDashboard {
-    private String id;
-    private List<Filter> query;
+    private String name;
+    private Map<String, String> query;
 }

@@ -47,6 +47,11 @@ public class TestData {
         return faker.regexify("^ID_[a-zA-Z]{5,20}$");
     }
 
+    public static String validNonExistingName() {
+        Faker faker = new Faker();
+        return faker.regexify("^NAME_[a-zA-Z]{5,20}$");
+    }
+
     public static List<String> validNonExistingPermissions() {
         Faker faker = new Faker();
         var permissions = new ArrayList<String>();
@@ -70,7 +75,7 @@ public class TestData {
 
     public static QueryDashboardDTO validNonExistingQueryDashboard() {
         return new QueryDashboardDTO(
-            validNonExistingId(),
+            validNonExistingName(),
             validNonExistingQueryMap()
         );
     }
@@ -89,7 +94,7 @@ public class TestData {
                 validNonExistingUsername(),
                 validPassword(),
                 validNonExistingRoles(),
-                null
+                List.of()
         );
     }
 

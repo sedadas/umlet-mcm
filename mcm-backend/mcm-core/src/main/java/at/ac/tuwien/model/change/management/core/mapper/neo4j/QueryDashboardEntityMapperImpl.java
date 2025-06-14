@@ -13,8 +13,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class QueryDashboardEntityMapperImpl implements QueryDashboardEntityMapper {
 
-    private final FilterEntityMapper filterEntityMapper;
-
     @Override
     public QueryDashboardEntity toEntity(QueryDashboard queryDashboard) {
         if (queryDashboard == null)
@@ -22,8 +20,8 @@ public class QueryDashboardEntityMapperImpl implements QueryDashboardEntityMappe
 
         var entity = new QueryDashboardEntity();
 
-        entity.setId(queryDashboard.getId());
-        entity.setQuery(filterEntityMapper.toEntities(queryDashboard.getQuery()));
+        entity.setName(queryDashboard.getName());
+        entity.setQuery(queryDashboard.getQuery());
 
         return entity;
     }
@@ -35,8 +33,8 @@ public class QueryDashboardEntityMapperImpl implements QueryDashboardEntityMappe
 
         var dto = new QueryDashboard();
 
-        dto.setId(queryDashboardEntity.getId());
-        dto.setQuery(filterEntityMapper.fromEntities(queryDashboardEntity.getQuery()));
+        dto.setName(queryDashboardEntity.getName());
+        dto.setQuery(queryDashboardEntity.getQuery());
 
         return dto;
     }

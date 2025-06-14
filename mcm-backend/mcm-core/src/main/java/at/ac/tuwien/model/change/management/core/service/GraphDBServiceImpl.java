@@ -353,13 +353,12 @@ public class GraphDBServiceImpl implements GraphDBService {
                 .collect(Collectors.toList());
 
         // Cypher: UNWIND the batch, match each node by name + umletProperties.conemoType='datasource',
-        // then set the two new properties (dataspaceTimestamp, dataspaceValue).
+        // then append a JSON string of type {dataspaceTimestamp: dataspaceValue} to the dataspace list property.
         String cypher = ""
                 + "UNWIND $batch AS row\n"
-                + "MATCH (d { name: row.name })\n"
-                + "WHERE d.`umletProperties.conemoType` = 'datasource'\n"
-                + "SET d.dataspaceTimestamp = row.ts,\n"
-                + "    d.dataspaceValue     = row.val";
+                + "MATCH (d {name: row.name, `umletProperties.conemoType`: 'datasource'})\n"
+                + "WITH d, '{\\'' + row.ts + '\\': \\'' + row.val + '\\'}' AS tstamp\n"
+                + "SET d.dataspace = coalesce(d.dataspace, []) + tstamp";
 
         try {
             rawNeo4jService.executeWriteQuery(cypher, Map.of("batch", batch));
