@@ -1,34 +1,34 @@
 <script setup lang="ts">
-
-import { useRouter } from 'vue-router';
-import NewProjectForm from "@/components/open-create-configuration/NewProjectForm.vue";
-import ProjectList from "@/components/open-create-configuration/ProjectList.vue";
+import axios from 'axios';
+import {Button} from "@/components/ui/button";
 import {onMounted, ref} from "vue";
-import {Configuration} from "@/types/Configuration.ts";
-import {getAllConfigurations} from "@/api/configuration.ts";
+import type {UserRole} from "@/types/User";
+import {getAllUserRoles} from "@/api/userRole.ts";
+import {ScrollArea} from "@/components/ui/scroll-area";
+import UserRoleView from "@/components/user-management/UserRoleView.vue";
 import {HelpCircle} from 'lucide-vue-next'
 import {User} from 'lucide-vue-next'
-import {Button} from "@/components/ui/button";
+import { useRouter } from 'vue-router';
+const router = useRouter();
+
 
 // variables
-const configurations = ref<Configuration[]>([]);
 const errorMessage = ref<string | undefined>(undefined);
-const router = useRouter();
+const userRoles = ref<UserRole[]>([]);
 
 // functions
 /**
- * Fetch all configurations
- * Uses the getAllConfigurations function from the configuration API
+ * Fetch all user Roles
+ * Uses the getAllUserRoles function from the user API
  */
-const fetchConfigurations = async () => {
+const fetchUserRoles = async () => {
   try {
-    configurations.value = await getAllConfigurations();
+    userRoles.value = await getAllUserRoles();
     errorMessage.value = undefined
   } catch (error: any) {
-    errorMessage.value = "Unable to fetch configurations: " + error.message
+    errorMessage.value = "Unable to fetch user Roles: " + error.message
   }
 };
-
 const logout = () => {
     document.cookie = "authHeader=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     router.push('/login');
@@ -36,12 +36,14 @@ const logout = () => {
 
 // lifecycle
 /**
- * Fetch all configurations on mounted
+ * Fetch all userRoless on mounted
  */
 onMounted(() => {
   errorMessage.value = undefined
-  fetchConfigurations();
+  fetchUserRoles();
 });
+
+
 </script>
 
 <template>
@@ -50,16 +52,32 @@ onMounted(() => {
     <h1 class="text-4xl font-semibold text-gray-800 mb-4">
       UMLet Model Change Management
     </h1>
+
     <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl overflow-hidden">
+      <div class="flex justify-center p-2">
+        <h1 class="text-4xl font-semibold text-gray-800 mb-4">
+          User Role Management
+        </h1>
+      </div>
       <div class="flex justify-center p-2">
         <label v-if="errorMessage" class="text-sm font-medium text-red-500">{{errorMessage}}</label>
         <label v-else class="text-sm font-medium text-green-500">Database connection OK</label>
       </div>
-      <div class="flex">
-        <ProjectList :configurations="configurations"/>
-        <NewProjectForm/>
-      </div>
+        <div class="space-y-2">
+          <ScrollArea class="h-52 rounded-md border">
+          <UserRoleView
+              v-for="role in userRoles"
+              :key="role.name"
+              :userRole="role"
+              @click="$router.push({ name: 'editRole', params: {id: role.name}})"
+          />
+          </ScrollArea>
+            <Button @click="$router.push({ name: 'newRole'})" class="w-full flex items-center gap-2" variant="outline">
+              Add Role
+            </Button>
+        </div>
     </div>
+
     <div class="flex items-center mt-3">
       <img src="/tu_logo.svg" alt="TU Wien Logo" class="w-12 m-2"/>
       <Button @click="logout()" class="w-full flex items-center gap-2" variant="outline">

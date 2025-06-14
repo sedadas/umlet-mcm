@@ -1,31 +1,35 @@
 <script setup lang="ts">
-
-import { useRouter } from 'vue-router';
-import NewProjectForm from "@/components/open-create-configuration/NewProjectForm.vue";
-import ProjectList from "@/components/open-create-configuration/ProjectList.vue";
-import {onMounted, ref} from "vue";
-import {Configuration} from "@/types/Configuration.ts";
-import {getAllConfigurations} from "@/api/configuration.ts";
+import {Button} from "@/components/ui/button";
+import type {UserRole} from "@/types/User";
+import {getAllUserRoles, createRole} from "@/api/userRole.ts";
 import {HelpCircle} from 'lucide-vue-next'
 import {User} from 'lucide-vue-next'
-import {Button} from "@/components/ui/button";
-
-// variables
-const configurations = ref<Configuration[]>([]);
-const errorMessage = ref<string | undefined>(undefined);
+import {onMounted, ref} from "vue";
+import Multiselect from 'vue-multiselect'
+import { useRouter } from 'vue-router';
 const router = useRouter();
+
+
+
+
+const errorMessage = ref<string | undefined>(undefined);
+const newUserRole = ref<UserRole>({
+  name: '',
+  permissions: ['']
+});
 
 // functions
 /**
- * Fetch all configurations
- * Uses the getAllConfigurations function from the configuration API
+ * Fetch all user Roles
+ * Uses the getAllUserRoles function from the user API
  */
-const fetchConfigurations = async () => {
+const createNewUserRole = async () => {
   try {
-    configurations.value = await getAllConfigurations();
+    await createRole(newUserRole.value);
     errorMessage.value = undefined
+    router.push({ name: 'userRoleManagement'})
   } catch (error: any) {
-    errorMessage.value = "Unable to fetch configurations: " + error.message
+    errorMessage.value = "Unable to create role: " + error.message
   }
 };
 
@@ -34,32 +38,66 @@ const logout = () => {
     router.push('/login');
 };
 
+const checkToAddNewInput = (index) => {
+  if (index === newUserRole.value.permissions.length - 1 && newUserRole.value.permissions[index].trim() !== '') {
+    newUserRole.value.permissions.push('');
+  }
+};
+
 // lifecycle
 /**
- * Fetch all configurations on mounted
+ * Fetch all user Roles on mounted
  */
 onMounted(() => {
-  errorMessage.value = undefined
-  fetchConfigurations();
+  errorMessage.value = undefined;
 });
-</script>
 
+</script>
 <template>
   <div class="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
     <img src="/mcm.png" alt="TU Wien Logo" class="mb-3 w-48"/>
     <h1 class="text-4xl font-semibold text-gray-800 mb-4">
       UMLet Model Change Management
     </h1>
+
     <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl overflow-hidden">
+
+
+      <div class="flex justify-center p-2">
+        <h1 class="text-4xl font-semibold text-gray-800 mb-4">
+          Create User Role
+        </h1>
+      </div>
+
       <div class="flex justify-center p-2">
         <label v-if="errorMessage" class="text-sm font-medium text-red-500">{{errorMessage}}</label>
         <label v-else class="text-sm font-medium text-green-500">Database connection OK</label>
       </div>
-      <div class="flex">
-        <ProjectList :configurations="configurations"/>
-        <NewProjectForm/>
-      </div>
+
+      <form @submit.prevent="createNewUserRole">
+        <div>
+          <label>Name:</label>
+          <input v-model.trim="newUserRole.name" placeholder="Enter Role Name" type="text" required />
+        </div>
+
+        <label>Permissions:</label>
+
+        <div v-for="(permission, index) in newUserRole.permissions" :key="index">
+          <input
+            type="text"
+            v-model="newUserRole.permissions[index]"
+            @input="checkToAddNewInput(index)"
+            placeholder="Enter text"
+          />
+        </div>
+
+        <Button type="submit" class="w-full flex items-center gap-2" variant="outline">
+          Create User Role
+        </Button>
+      </form>
+
     </div>
+
     <div class="flex items-center mt-3">
       <img src="/tu_logo.svg" alt="TU Wien Logo" class="w-12 m-2"/>
       <Button @click="logout()" class="w-full flex items-center gap-2" variant="outline">

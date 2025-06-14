@@ -32,7 +32,8 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: `http://localhost:${VITE_API_PORT}`,
-        changeOrigin: true
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
       }
     },
     hmr: {

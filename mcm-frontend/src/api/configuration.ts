@@ -4,10 +4,23 @@ import {DiffObject} from "@/types/DiffObject.ts";
 import {AppConfig} from "@/config";
 
 
+
+function getCookie(name: string): string | null {
+  const cookies = document.cookie.split('; ')
+  for (const cookie of cookies) {
+    const [key, value] = cookie.split('=')
+    if (key === name) {
+      return decodeURIComponent(value)
+    }
+  }
+  return null
+}
+
 const apiClient = axios.create({
     baseURL: AppConfig.apiBaseUrl + '/api/v1/configurations',
     headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': getCookie('authHeader')
     }
 });
 
@@ -170,4 +183,6 @@ export const getLastCreatedConfiguration = async (name: string, currentVersion: 
     } catch (error) {
         throw error;
     }
+
+
 }
