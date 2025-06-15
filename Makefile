@@ -20,10 +20,12 @@ endif
 
 all: frontend backend docker
 
+export VITE_API_URL=http://localhost
 export VITE_API_PORT=9081
 export VITE_NODE_ENV=$(TARGET)
 
 frontend:
+	cat $(FRONTEND_DIR)/.env.prod > $(FRONTEND_DIR)/.env
 	cd $(FRONTEND_DIR) && npm install
 	cd $(FRONTEND_DIR) && npm run build
 
