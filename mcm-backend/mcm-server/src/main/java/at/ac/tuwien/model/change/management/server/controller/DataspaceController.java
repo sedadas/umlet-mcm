@@ -86,12 +86,10 @@ public class DataspaceController {
      * @param file the uploaded NDJSON file
      */
     private void validateFile(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            // DSI_0001
-            throw new InvalidFileException();
-        }
-        validateFileExtension(file);
+        log.info("Validating dataspace file with UUID: {}", file.getOriginalFilename());
+
         validateFileFormat(file);
+        validateFileExtension(file);
     }
 
     /**
@@ -101,6 +99,7 @@ public class DataspaceController {
      * @param file the uploaded NDJSON file
      */
     private void validateFileExtension(MultipartFile file) {
+        log.info("Validating dataspace file extension with UUID: {}", file.getOriginalFilename());
         String filename = file.getOriginalFilename();
         if (filename == null || !filename.toLowerCase().endsWith(".ndjson")) {
             // DSI_0001
@@ -115,6 +114,7 @@ public class DataspaceController {
      * @param file the uploaded NDJSON file
      */
     private void validateFileFormat(MultipartFile file) {
+        log.info("Validating dataspace file format with UUID: {}", file.getOriginalFilename());
         if (file.isEmpty()) {
             // DSI_0001
             throw new InvalidFileException();
@@ -130,6 +130,7 @@ public class DataspaceController {
      */
     private List<Map.Entry<String, String>> groupDatasourcesByName(
             @NotNull MultipartFile file) {
+        log.info("Grouping datasources by name from file: {}", file.getOriginalFilename());
 
         Map<String, List<Map<String, Object>>> grouped = new LinkedHashMap<>();
 
@@ -137,12 +138,14 @@ public class DataspaceController {
                 new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
 
             String line;
-
+            int lineNumber = 0;
             while ((line = reader.readLine()) != null) {
+                lineNumber++;
+                log.info("Processing line: {}", line);
                 line = line.trim();
                 if (line.isBlank()) continue;
 
-                Map<String, Object> parsed = this.parseJson(line);
+                Map<String, Object> parsed = this.parseJson(lineNumber, line);
                 this.validateSchema(parsed);
 
                 String timestamp = (String) parsed.get("timestamp");
@@ -170,6 +173,7 @@ public class DataspaceController {
                     e
             );
         }
+        log.info("Grouped datasources: {}", grouped);
 
         List<Map.Entry<String, String>> result = new ArrayList<>(grouped.size());
         grouped.forEach((name, list) -> {
@@ -186,6 +190,7 @@ public class DataspaceController {
             }
         });
 
+        log.info("Successfully grouped {} datasources", result.size());
         return result;
     }
 
@@ -196,14 +201,14 @@ public class DataspaceController {
      * @param jsonString The JSON string to parse
      * @return The parsed JSON as a Map
      */
-    private Map<String, Object> parseJson(String jsonString) {
+    private Map<String, Object> parseJson(int lineNumber, String jsonString) {
+        log.debug("Parsing JSON string: {}", jsonString);
         try {
             return objectMapper.readValue(jsonString, Map.class);
         } catch (Exception e) {
-            log.error("Failed to parse JSON: {}", e.getMessage());
             // Use our standardized JSON‐parse exception (DSI_0002)
             throw new JsonParseException(
-                    0,
+                    lineNumber,
                     e.getMessage(),
                     e
             );
@@ -227,8 +232,7 @@ public class DataspaceController {
      * @throws JsonParseException, MissingTimestampException, … on bad data
      */
     private void validateWholeFileSchema(@NotNull MultipartFile file) throws DataspaceImportException {
-
-        // basic checks you already have (extension, empty file, …)
+        log.info("Validating entire NDJSON file: {}", file.getOriginalFilename());
         this.validateFile(file);
 
         try (BufferedReader reader = new BufferedReader(
@@ -242,7 +246,7 @@ public class DataspaceController {
                 line = line.trim();
                 if (line.isBlank()) continue;
 
-                Map<String, Object> parsed = this.parseJson(line);
+                Map<String, Object> parsed = this.parseJson(lineNumber, line);
                 this.validateSchema(parsed);
             }
 
@@ -257,6 +261,7 @@ public class DataspaceController {
                     e
             );
         }
+        log.info("Successfully validated datasources in {}", file.getOriginalFilename());
     }
 
 
@@ -267,6 +272,7 @@ public class DataspaceController {
      * @param parsed The parsed JSON object as a Map
      */
     private void validateSchema(Map<String, Object> parsed) {
+        log.info("Validating dataspace schema: {}", parsed);
         if (!parsed.containsKey("timestamp") || !(parsed.get("timestamp") instanceof String)) {
             // DSI_0003
             throw new MissingTimestampException(0);
@@ -285,6 +291,7 @@ public class DataspaceController {
 
         for (int i = 0; i < dsRawList.size(); i++) {
             Object element = dsRawList.get(i);
+            log.info("Starting validation for element at index {}: {}", i, element);
             if (!(element instanceof Map)) {
                 // DSI_0002
                 throw new JsonParseException(
@@ -300,7 +307,7 @@ public class DataspaceController {
                 // DSI_0005
                 throw new MissingNameValueException(
                         i + 1,
-                        ""  // no key available
+                        ""
                 );
             }
             if (!dsEntry.containsKey("value")) {
@@ -312,11 +319,18 @@ public class DataspaceController {
                 );
             }
         }
+        log.info("Successfully validated dataspaces in {}", parsed);
     }
 
-
-    // extract dataspaces from json object
+    /**
+     * Extracts the list of data sources from the parsed JSON object.
+     * Throws MissingDataspacesException if 'datasources' is missing or empty.
+     *
+     * @param parsed The parsed JSON object as a Map
+     * @return List of data sources
+     */
     private List<Object> extractDataspaces(Map<String, Object> parsed) {
+        log.info("Extracting dataspaces: {}", parsed);
         if (!parsed.containsKey("datasources")) {
             // DSI_0004: missing 'dataspaces'
             throw new MissingDataspacesException(0);
@@ -325,57 +339,12 @@ public class DataspaceController {
         System.out.println("DataspaceController → parsed = %s".formatted(parsed));
         List<Object> dsRawList = (List<Object>) parsed.get("datasources");
         System.out.println("DataspaceController <UNK> parsed = %s".formatted(dsRawList));
+
         if (dsRawList.isEmpty()) {
             throw new MissingDataspacesException(0);
         }
+
+        log.info("DataspaceController <UNK> parsed = %s".formatted(dsRawList));
         return dsRawList;
-    }
-
-
-    /**
-     * Builds a map from data source names to their values.
-     * If multiple entries have the same name, the last one wins.
-     *
-     * @param dsRawList The list of raw data source entries
-     * @return A map with names as keys and values as values
-     */
-    private Map<String, Object> buildValuesByName(List<Object> dsRawList) {
-        Map<String, Object> valuesByName = new HashMap<>();
-        for (int i = 0; i < dsRawList.size(); i++) {
-            Object element = dsRawList.get(i);
-            if (!(element instanceof Map)) {
-                // DSI_0002: invalid JSON structure for dataspace entry
-                throw new JsonParseException(
-                        i + 1,
-                        "Element at dataspaces[" + i + "] is not an object",
-                        null
-                );
-            }
-            @SuppressWarnings("unchecked")
-            Map<String, Object> dsEntry = (Map<String, Object>) element;
-
-            if (!dsEntry.containsKey("name") || !(dsEntry.get("name") instanceof String)) {
-                // DSI_0005: missing name or value
-                throw new JsonParseException(
-                        i + 1,
-                        "Missing or invalid 'name' in dataspaces[" + i + "]",
-                        null
-                );
-            }
-            if (!dsEntry.containsKey("value")) {
-                // DSI_0005: missing name or value
-                throw new JsonParseException(
-                        i + 1,
-                        "Missing 'value' in dataspaces[" + i + "]",
-                        null
-                );
-            }
-
-            String dsName = (String) dsEntry.get("name");
-            Object dsValue = dsEntry.get("value");
-            // Overwrite if duplicate names; last one wins
-            valuesByName.put(dsName, dsValue);
-        }
-        return valuesByName;
     }
 }
