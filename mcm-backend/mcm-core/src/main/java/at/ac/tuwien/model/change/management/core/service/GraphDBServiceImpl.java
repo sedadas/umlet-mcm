@@ -15,7 +15,6 @@ import at.ac.tuwien.model.change.management.graphdb.dao.ModelEntityDAO;
 import at.ac.tuwien.model.change.management.graphdb.dao.NodeEntityDAO;
 import at.ac.tuwien.model.change.management.graphdb.dao.RawNeo4jService;
 import at.ac.tuwien.model.change.management.graphdb.entities.NodeEntity;
-import at.ac.tuwien.model.change.management.graphdb.exceptions.DataspaceUpdateException;
 import at.ac.tuwien.model.change.management.graphdb.exceptions.InvalidQueryException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -54,15 +53,6 @@ public class GraphDBServiceImpl implements GraphDBService {
     private final NodeUpdater nodeUpdater;
 
     private final RawNeo4jService rawNeo4jService;
-
-    private static final String UPSERT_DATASPACE_CYPHER = """
-    UNWIND $batch AS row
-    MATCH (d {name: row.name, `umletProperties.conemoType`: 'datasource'})
-    SET d.dataspace = coalesce(d.dataspace, {})
-    SET d.dataspace[row.ts] = row.val
-    """;
-
-    // TODO: fix query to use the correct label for datasources
 
 
     @Lazy @Autowired
@@ -331,102 +321,39 @@ public class GraphDBServiceImpl implements GraphDBService {
         log.info("Cleared the graph database.");
     }
 
-
-    /**
-     * Convenience overload: generates its own uploadId so callers
-     * only need provide timestamp + values.
-     */
     @Override
-    public void upsertDataspaceProperties(String timestamp,
-                                          Map<String, Object> valuesByName) {
-        upsertDataspaceProperties(timestamp, valuesByName, UUID.randomUUID());
-    }
+    public void upsertDatasourceValue(String datasourceName,
+                                      String datasourceValues) {
 
-    @Override
-    public void upsertDataspaceProperties(String timestamp,
-                                          Map<String, Object> valuesByName, UUID uploadId) {
-        // 1) Validate inputs
-        if (timestamp == null || timestamp.isBlank()) {
-            // DSI_0003: missing timestamp
-            throw new MissingTimestampException(0);
+        // ── basic validation ─────────────────────────────────────────
+        if (datasourceName == null || datasourceName.isBlank()) {
+            log.warn("upsertDatasourceValue called with blank datasourceName → skip");
+            return;
         }
-        if (valuesByName == null || valuesByName.isEmpty()) {
-            log.warn("upsertDataspaceProperties called with empty or null valuesByName → skipping update.");
+        if (datasourceValues == null) {
+            log.warn("upsertDatasourceValue called with null datasourceValues → skip");
             return;
         }
 
-        // 2) Build a safe batch payload
-        List<Map<String, Object>> batch = this.buildBatchPayload(valuesByName, timestamp);
+        // ── parameters ───────────────────────────────────────────────
+        Map<String,Object> params = Map.of(
+                "name",  datasourceName,
+                "value", datasourceValues
+        );
 
-        // 3) Cypher using native map syntax (no manual JSON string building)
-        this.executeBatchUpdate(batch, uploadId);
-
-        log.info("upsertDataspaceProperties: Successfully upserted properties for {} data sources.",
-                valuesByName.size());
-    }
-
-
-    /**
-     * Builds a batch payload for the upsertDataspaceProperties method.
-     * This method is used to create a list of maps that can be used in the Cypher query.
-     *
-     * @param valuesByName Map of data source names to their values
-     * @param timestamp    The timestamp to set for each data source
-     * @return List of maps representing the batch payload
-     */
-    private List<Map<String, Object>> buildBatchPayload(Map<String, Object> valuesByName, String timestamp) {
-         return valuesByName.entrySet().stream()
-                .map(entry -> Map.<String, Object>of(
-                        "name", entry.getKey(),
-                        "ts", timestamp,
-                        "val", entry.getValue() != null ? entry.getValue().toString() : null
-                ))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Executes a batch update for the upsertDataspaceProperties method.
-     * This method is used to execute the Cypher query with the given batch payload.
-     *
-     * @param batch    List of maps representing the batch payload
-     * @param uploadId The UUID of the upload, used for logging and error handling
-     */
-    private void executeBatchUpdate(List<Map<String, Object>> batch, UUID uploadId) {
-        // 1) Guard against empty batch
-        if (batch == null || batch.isEmpty()) {
-            log.warn("uploadId={} | No dataspaces to update (empty batch)", uploadId);
-            return;
-        }
-
-        System.out.println("Batch: " + batch);
-
-        Map<String, Object> params = Map.of("batch", batch);
-        String sampleName = batch.stream()
-                .map(m -> m.get("name"))
-                .filter(Objects::nonNull)
-                .map(Object::toString)
-                .findFirst()
-                .orElse("n/a");
+        // ── Cypher ───────────────────────────────────────────────────
+        final String cypher = """
+        MATCH (d {name: $name, `umletProperties.conemoType`: 'datasource'})
+        SET   d.datasourceValues = $value
+        """;
 
         try {
-            rawNeo4jService.executeWriteQuery(UPSERT_DATASPACE_CYPHER, params);
-            log.info("uploadId={} | Updated dataspace on {} nodes (sample='{}')",
-                    uploadId, batch.size(), sampleName);
-        } catch (Neo4jException ne) {
-            log.error("uploadId={} | Neo4j update failed: batchSize={}, error={}",
-                    uploadId, batch.size(), ne.getMessage(), ne);
-            // use the standardized OverwriteFailedException
-            throw new OverwriteFailedException(
-                    "Neo4j failed to upsert dataspace properties", ne
-            );
-        } catch (Exception e) {
-            log.error("uploadId={} | Unexpected error during batch update: batchSize={}, error={}",
-                    uploadId, batch.size(), e.getMessage(), e);
-            // also wrap in OverwriteFailedException to carry our error code/message
-            throw new OverwriteFailedException(
-                    "Failed to execute batch update for dataspace properties", e
-            );
+            rawNeo4jService.executeWriteQuery(cypher, params);
+            log.info("upsertDatasourceValue | datasource='{}' | val='{}' – success",
+                    datasourceName, datasourceValues);
+        } catch (Neo4jException neo) {
+            log.error("Neo4j write failed in upsertDatasourceValue", neo);
+            throw new OverwriteFailedException("Neo4j write failed", neo);
         }
     }
-
 }

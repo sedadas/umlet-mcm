@@ -6,7 +6,6 @@ import at.ac.tuwien.model.change.management.core.exception.DataspaceImportExcept
 import at.ac.tuwien.model.change.management.core.exception.dataspace_import_exceptions.*;
 import at.ac.tuwien.model.change.management.core.service.GraphDBService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.constraints.NotNull;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -59,46 +59,32 @@ public class DataspaceController {
         // 2) Validate the file
         this.validateFile(file);
 
-        String firstLine = this.readLineAtIndex(file, 0);
-        if (firstLine == null) {
-            // DSI_0001: file is empty or contains no valid JSON
-            throw new InvalidFileException();
-        }
-
         // 3) Parse that line as JSON
-        Map<String, Object> parsed = this.parseJson(firstLine);
-        // 4) Validate the schema
-        this.validateSchema(parsed);
+        this.validateWholeFileSchema(file);
 
-        String timestamp = (String) parsed.get("timestamp");
-        @SuppressWarnings("unchecked")
-        List<Object> datasources = this.extractDataspaces(parsed);
+        // 5) Extract datasources with timestamp and values
+        List<Map.Entry<String, String>> datasources = this.groupDatasourcesByName(file);
 
-        // 5) Build a map from name→value
-        Map<String, Object> valuesByName = this.buildValuesByName(datasources);
-
-        // 6) Delegate to GraphDBService, which writes into Neo4j
-        ResponseEntity<List<Map<String, String>>> response =
-                this.upsertDataspaceData(timestamp, valuesByName, uuid);
-
-        if (response.getStatusCode().isError()) {
-            log.error("Failed to update Neo4j: {}", response.getBody());
-            // DSI_0009: error during Neo4j update
-            throw new DataspaceImportException(
-                    "DSI_0009",
-                    "Failed to update Neo4j: " + response.getBody()
-            );
-        }
+        // 6) upsert each datasource value
+        datasources.forEach(entry -> {
+            String name         = entry.getKey();
+            String jsonArrayStr = entry.getValue();           // already a JSON string
+            graphDBService.upsertDatasourceValue(name, jsonArrayStr);
+        });
 
         // 7) Log success and return response
-        log.info("Successfully updated Neo4j with {} dataspaces", valuesByName.size());
-        return ResponseEntity.ok(Map.of(
-                "message", "Dataspace properties updated",
-                "count", valuesByName.size()
-        ));
+        log.info("Successfully imported {} datasources from file with UUID: {}", datasources.size(), uuid);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(Map.of("uuid", uuid.toString(), "datasources", datasources.size()));
     }
 
-
+    /**
+     * Validates the uploaded NDJSON file.
+     * Checks if the file is not null, not empty, has a valid extension,
+     * and is in the correct format.
+     *
+     * @param file the uploaded NDJSON file
+     */
     private void validateFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             // DSI_0001
@@ -108,6 +94,12 @@ public class DataspaceController {
         validateFileFormat(file);
     }
 
+    /**
+     * Validates that the file has a valid NDJSON extension.
+     * Throws InvalidFileException if the file extension is not .ndjson.
+     *
+     * @param file the uploaded NDJSON file
+     */
     private void validateFileExtension(MultipartFile file) {
         String filename = file.getOriginalFilename();
         if (filename == null || !filename.toLowerCase().endsWith(".ndjson")) {
@@ -116,6 +108,12 @@ public class DataspaceController {
         }
     }
 
+    /**
+     * Validates that the file is not empty.
+     * Throws InvalidFileException if the file is empty.
+     *
+     * @param file the uploaded NDJSON file
+     */
     private void validateFileFormat(MultipartFile file) {
         if (file.isEmpty()) {
             // DSI_0001
@@ -123,35 +121,73 @@ public class DataspaceController {
         }
     }
 
-
     /**
-     * Reads the first non-blank line at the given index from the NDJSON file.
-     * Returns null if the index is out of bounds or if EOF is reached.
+     * Reads the uploaded NDJSON file, groups data sources by their names,
+     * and returns a list of entries with name and corresponding JSON array.
      *
-     * @param file  The NDJSON file to read
-     * @param index The line index to read (0-based)
-     * @return The line content or null if not found
+     * @param file the uploaded NDJSON file
+     * @return List of Map.Entry with datasource name and JSON array string
      */
-    private String readLineAtIndex(MultipartFile file, int index) {
+    private List<Map.Entry<String, String>> groupDatasourcesByName(
+            @NotNull MultipartFile file) {
+
+        Map<String, List<Map<String, Object>>> grouped = new LinkedHashMap<>();
+
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
-            for (int i = 0; i <= index; i++) {
-                String line = reader.readLine();
-                if (line == null) return null; // EOF
-                if (i == index) return line.trim(); // Return the requested line
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isBlank()) continue;
+
+                Map<String, Object> parsed = this.parseJson(line);
+                this.validateSchema(parsed);
+
+                String timestamp = (String) parsed.get("timestamp");
+                List<Object> datasources = this.extractDataspaces(parsed);
+
+                for (Object obj : datasources) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> ds = (Map<String, Object>) obj;
+
+                    String name  = (String) ds.get("name");
+                    Object value = ds.get("value");
+
+                    grouped
+                            .computeIfAbsent(name, k -> new ArrayList<>())
+                            .add(Map.of("timestamp", timestamp, "value", value));
+                }
             }
+        } catch (DataspaceImportException die) {
+            throw die;
         } catch (Exception e) {
-            log.error("Failed to read line at index {}: {}", index, e.getMessage(), e);
-            // Wrap any I/O or reader error in our generic dataspace‐import exception
+            log.error("Failed to aggregate NDJSON file", e);
             throw new DataspaceImportException(
                     "DSI_0000",
-                    "Failed to read line at index " + index + ": " + e.getMessage(),
+                    "Failed to aggregate NDJSON file: " + e.getMessage(),
                     e
             );
         }
-        return null;
-    }
 
+        List<Map.Entry<String, String>> result = new ArrayList<>(grouped.size());
+        grouped.forEach((name, list) -> {
+            try {
+                String jsonArray = objectMapper.writeValueAsString(list);
+                result.add(new AbstractMap.SimpleEntry<>(name, jsonArray));
+            } catch (Exception e) {
+                log.error("JSON serialisation failed for datasource '{}'", name, e);
+                throw new DataspaceImportException(
+                        "DSI_0000",
+                        "Serialisation error for datasource '" + name + "'",
+                        e
+                );
+            }
+        });
+
+        return result;
+    }
 
     /**
      * Parses the given JSON string into a Map.
@@ -173,6 +209,56 @@ public class DataspaceController {
             );
         }
     }
+
+    /**
+     * Reads the uploaded *.ndjson* line-by-line and validates the schema
+     * of every record.
+     *
+     * It re-uses the existing helpers:
+     *   • parseJson(line)     – generic JSON → Map
+     *   • validateSchema(map) – structural checks / DSI_…. exceptions
+     *
+     * If any line is malformed, the corresponding DSI_… exception is
+     * propagated unchanged, so the rest of your controller keeps its
+     * current error handling.
+     *
+     * @param file the uploaded NDJSON file
+     * @throws DataspaceImportException on I/O problems
+     * @throws JsonParseException, MissingTimestampException, … on bad data
+     */
+    private void validateWholeFileSchema(@NotNull MultipartFile file) throws DataspaceImportException {
+
+        // basic checks you already have (extension, empty file, …)
+        this.validateFile(file);
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+
+            String line;
+            int lineNumber = 0;
+
+            while ((line = reader.readLine()) != null) {
+                lineNumber++;
+                line = line.trim();
+                if (line.isBlank()) continue;
+
+                Map<String, Object> parsed = this.parseJson(line);
+                this.validateSchema(parsed);
+            }
+
+        } catch (DataspaceImportException die) {
+            throw die;
+        } catch (Exception e) {
+            log.error("Failed while validating entire NDJSON file", e);
+            // DSI_0000: any unexpected I/O or processing error
+            throw new DataspaceImportException(
+                    "DSI_0000",
+                    "Failed while validating NDJSON file: " + e.getMessage(),
+                    e
+            );
+        }
+    }
+
 
     /**
      * Validates the schema of the parsed JSON object.
@@ -292,63 +378,4 @@ public class DataspaceController {
         }
         return valuesByName;
     }
-
-    /**
-     * Upserts the dataspace data into the Neo4j database.
-     * Handles exceptions and returns appropriate HTTP responses.
-     *
-     * @param timestamp    The ISO-8601 timestamp
-     * @param valuesByName Map of data source names to their values
-     * @param uuid         The UUID of the upload
-     * @return ResponseEntity with the result of the upsert operation
-     */
-    private ResponseEntity<List<Map<String, String>>> upsertDataspaceData(
-            String timestamp,
-            Map<String, Object> valuesByName,
-            UUID uuid) {
-
-        try {
-            graphDBService.upsertDataspaceProperties(timestamp, valuesByName, uuid);
-        }
-        catch (MissingTimestampException e) {
-            log.error("upsertDataspaceData failed – missing timestamp", e);
-            return ResponseEntity
-                    .badRequest()
-                    .body(Collections.singletonList(
-                            Map.of(
-                                    "errorCode",   e.getErrorCode(),
-                                    "message",     e.getMessage()
-                            )
-                    ));
-        }
-        catch (OverwriteFailedException e) {
-            log.error("upsertDataspaceData failed – Neo4j overwrite error", e);
-            return ResponseEntity
-                    .status(HttpStatus.BAD_GATEWAY)
-                    .body(Collections.singletonList(
-                            Map.of(
-                                    "errorCode",   e.getErrorCode(),
-                                    "message",     e.getMessage()
-                            )
-                    ));
-        }
-        catch (Exception e) {
-            log.error("GraphDBService.upsertDataspaceProperties failed", e);
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.singletonList(
-                            Map.of(
-                                    "error",   "Failed to update Neo4j: " + e.getMessage()
-                            )
-                    ));
-        }
-
-        return ResponseEntity.ok(Collections.singletonList(
-                Map.of(
-                        "message", "Dataspace properties updated",
-                        "count",   String.valueOf(valuesByName.size())
-                )
-        ));
-    }
-
 }

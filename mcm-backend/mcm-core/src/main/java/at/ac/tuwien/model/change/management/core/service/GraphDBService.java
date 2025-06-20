@@ -168,43 +168,10 @@ public interface GraphDBService {
 
 
     /**
-     * Given:
-     *   - a common ISO‐8601 timestamp string (e.g. "2025-05-20T14:23:45Z")
-     *   - a map from data‐source name → JSON‐typed value (Object)
-     *
-     * This method updates each matching DataSource node in Neo4j by setting
-     * two new top‐level properties on that node:
-     *   • d.dataspaceTimestamp = timestamp
-     *   • d.dataspaceValue     = value.toString()
-     *
-     * We assume each data‐source node has the label :DataSource and
-     * a “name” property exactly matching the map key.
-     *
-     * If a given name does not match any existing node, it is skipped (no error).
-     *
-     * @param timestamp    ISO‐8601 timestamp (String)
-     * @param valuesByName Map<assetName, JSON‐typed value>
+     * Upserts a datasource value in the graph database
+     * @param datasourceName The name of the datasource
+     * @param timestamp The timestamp of the value
+     * @param value The value to upsert
      */
-    public void upsertDataspaceProperties(String timestamp, Map<String, Object> valuesByName);
-
-    /**
-     * Given:
-     *   - a common ISO‐8601 timestamp string (e.g. "2025-05-20T14:23:45Z")
-     *   - a map from data‐source name → JSON‐typed value (Object)
-     *
-     * This method updates each matching DataSource node in Neo4j by setting
-     * two new top‐level properties on that node:
-     *   • d.dataspaceTimestamp = timestamp
-     *   • d.dataspaceValue     = value.toString()
-     *
-     * We assume each data‐source node has the label :DataSource and
-     * a “name” property exactly matching the map key.
-     *
-     * If a given name does not match any existing node, it is skipped (no error).
-     *
-     * @param timestamp    ISO‐8601 timestamp (String)
-     * @param valuesByName Map<assetName, JSON‐typed value>
-     */
-    void upsertDataspaceProperties(String timestamp, Map<String, Object> valuesByName, UUID uploadId);
-
+    public void upsertDatasourceValue(String datasourceName, String datasourceValues);
 }
