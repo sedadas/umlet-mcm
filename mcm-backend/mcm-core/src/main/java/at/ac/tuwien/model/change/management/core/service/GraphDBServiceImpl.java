@@ -1,6 +1,8 @@
 package at.ac.tuwien.model.change.management.core.service;
 
 import at.ac.tuwien.model.change.management.core.exception.UxfException;
+import at.ac.tuwien.model.change.management.core.exception.dataspace_import_exceptions.MissingTimestampException;
+import at.ac.tuwien.model.change.management.core.exception.dataspace_import_exceptions.OverwriteFailedException;
 import at.ac.tuwien.model.change.management.core.mapper.neo4j.*;
 import at.ac.tuwien.model.change.management.core.mapper.neo4j.updater.ConfigurationUpdater;
 import at.ac.tuwien.model.change.management.core.mapper.neo4j.updater.NodeUpdater;
@@ -21,12 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.neo4j.driver.Value;
-import org.neo4j.driver.Values;
-import org.neo4j.driver.internal.InternalNode;
-import org.neo4j.driver.internal.value.FloatValue;
-import org.neo4j.driver.internal.value.IntegerValue;
-import org.neo4j.driver.internal.value.ListValue;
-import org.neo4j.driver.internal.value.StringValue;
+import org.neo4j.driver.exceptions.Neo4jException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ByteArrayResource;
@@ -56,6 +53,7 @@ public class GraphDBServiceImpl implements GraphDBService {
     private final NodeUpdater nodeUpdater;
 
     private final RawNeo4jService rawNeo4jService;
+
 
     @Lazy @Autowired
     private ConfigurationService configurationService;
@@ -323,50 +321,39 @@ public class GraphDBServiceImpl implements GraphDBService {
         log.info("Cleared the graph database.");
     }
 
-    /**
-     * For each entry in valuesByName (name→value), find the node whose
-     * umletProperties.conemoType = 'datasource' and name = row.name,
-     * then set two new properties: dataspaceTimestamp and dataspaceValue.
-     *
-     * @param timestamp     an ISO‐8601 string, e.g. "2025-06-01T10:15:00Z"
-     * @param valuesByName  map from datasource‐node name to its value
-     */
     @Override
-    public void upsertDataspaceProperties(@NonNull String timestamp,
-                                          @NonNull Map<String, Object> valuesByName) {
-        if (valuesByName.isEmpty()) {
-            log.warn("upsertDataspaceProperties called with empty map → skipping update.");
+    public void upsertDatasourceValue(String datasourceName,
+                                      String datasourceValues) {
+
+        // ── basic validation ─────────────────────────────────────────
+        if (datasourceName == null || datasourceName.isBlank()) {
+            log.warn("upsertDatasourceValue called with blank datasourceName → skip");
+            return;
+        }
+        if (datasourceValues == null) {
+            log.warn("upsertDatasourceValue called with null datasourceValues → skip");
             return;
         }
 
-        // Build a batch payload: List of { name: <assetName>, ts: <timestamp>, val: <valueString> }
-        List<Map<String, Object>> batch = valuesByName.entrySet().stream()
-                .map(entry -> {
-                    Map<String, Object> record = new HashMap<>();
-                    record.put("name", entry.getKey());
-                    record.put("val", entry.getValue() == null
-                            ? null
-                            : entry.getValue().toString());
-                    record.put("ts", timestamp);
-                    return record;
-                })
-                .collect(Collectors.toList());
+        // ── parameters ───────────────────────────────────────────────
+        Map<String,Object> params = Map.of(
+                "name",  datasourceName,
+                "value", datasourceValues
+        );
 
-        // Cypher: UNWIND the batch, match each node by name + umletProperties.conemoType='datasource',
-        // then append a JSON string of type {dataspaceTimestamp: dataspaceValue} to the dataspace list property.
-        String cypher = ""
-                + "UNWIND $batch AS row\n"
-                + "MATCH (d {name: row.name, `umletProperties.conemoType`: 'datasource'})\n"
-                + "WITH d, '{\\'' + row.ts + '\\': \\'' + row.val + '\\'}' AS tstamp\n"
-                + "SET d.dataspace = coalesce(d.dataspace, []) + tstamp";
+        // ── Cypher ───────────────────────────────────────────────────
+        final String cypher = """
+        MATCH (d {name: $name, `umletProperties.conemoType`: 'datasource'})
+        SET   d.datasourceValues = $value
+        """;
 
         try {
-            rawNeo4jService.executeWriteQuery(cypher, Map.of("batch", batch));
-            log.info("upsertDataspaceProperties: set dataspaceTimestamp & dataspaceValue on {} records",
-                    batch.size());
-        } catch (Exception e) {
-            log.error("Error in upsertDataspaceProperties", e);
-            throw new RuntimeException("Failed to upsert dataspace properties", e);
+            rawNeo4jService.executeWriteQuery(cypher, params);
+            log.info("upsertDatasourceValue | datasource='{}' | val='{}' – success",
+                    datasourceName, datasourceValues);
+        } catch (Neo4jException neo) {
+            log.error("Neo4j write failed in upsertDatasourceValue", neo);
+            throw new OverwriteFailedException("Neo4j write failed", neo);
         }
     }
 }
