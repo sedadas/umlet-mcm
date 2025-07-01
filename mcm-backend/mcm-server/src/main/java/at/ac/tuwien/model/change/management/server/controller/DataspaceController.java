@@ -67,9 +67,9 @@ public class DataspaceController {
 
         // 6) upsert each datasource value
         datasources.forEach(entry -> {
-            String name         = entry.getKey();
-            String jsonArrayStr = entry.getValue();           // already a JSON string
-            graphDBService.upsertDatasourceValue(name, jsonArrayStr);
+            String name  = entry.getKey();
+            String value = entry.getValue();           // already a JSON string
+            graphDBService.upsertDatasourceValue(name, value);
         });
 
         // 7) Log success and return response
@@ -132,7 +132,7 @@ public class DataspaceController {
             @NotNull MultipartFile file) {
         log.info("Grouping datasources by name from file: {}", file.getOriginalFilename());
 
-        Map<String, List<Map<String, Object>>> grouped = new LinkedHashMap<>();
+        Map<String, Map<String, Object>> grouped = new LinkedHashMap<>();
 
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
@@ -159,8 +159,7 @@ public class DataspaceController {
                     Object value = ds.get("value");
 
                     grouped
-                            .computeIfAbsent(name, k -> new ArrayList<>())
-                            .add(Map.of("timestamp", timestamp, "value", value));
+                            .computeIfAbsent(name, k -> Map.of("timestamp", timestamp, "value", value));
                 }
             }
         } catch (DataspaceImportException die) {
@@ -176,10 +175,10 @@ public class DataspaceController {
         log.info("Grouped datasources: {}", grouped);
 
         List<Map.Entry<String, String>> result = new ArrayList<>(grouped.size());
-        grouped.forEach((name, list) -> {
+        grouped.forEach((name, val) -> {
             try {
-                String jsonArray = objectMapper.writeValueAsString(list);
-                result.add(new AbstractMap.SimpleEntry<>(name, jsonArray));
+                String jsonObject = objectMapper.writeValueAsString(val);
+                result.add(new AbstractMap.SimpleEntry<>(name, jsonObject));
             } catch (Exception e) {
                 log.error("JSON serialisation failed for datasource '{}'", name, e);
                 throw new DataspaceImportException(

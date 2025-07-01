@@ -344,7 +344,7 @@ public class GraphDBServiceImpl implements GraphDBService {
         // ── Cypher ───────────────────────────────────────────────────
         final String cypher = """
         MATCH (d {name: $name, `umletProperties.conemoType`: 'datasource'})
-        SET   d.datasourceValues = $value
+        SET   d.datasourceValues = COALESCE(d.datasourceValues, []) + $value
         """;
 
         try {
