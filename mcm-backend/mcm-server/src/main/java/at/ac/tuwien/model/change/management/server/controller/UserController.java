@@ -87,13 +87,13 @@ public class UserController {
      *         code 400 if the user already exists or validation failed
      */
     @PostMapping
-    public ResponseEntity<UserDTO> addUser(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<String> addUser(@RequestBody UserDTO userDTO) {
         try {
             var user = userService.createUser(userDtoMapper.fromDto(userDTO));
-            return ResponseEntity.ok(userDtoMapper.toDto(user));
+            return ResponseEntity.ok("");
         } catch (UserAlreadyExistsException | UserValidationException e) {
             log.error("User invalid", e);
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
@@ -105,13 +105,13 @@ public class UserController {
      *         code 404 if the user does not exist
      */
     @PutMapping
-    public ResponseEntity<UserDTO> updateUser(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<String> updateUser(@RequestBody UserDTO userDTO) {
         try {
             var user = userService.updateUser(userDtoMapper.fromDto(userDTO));
-            return ResponseEntity.ok(userDtoMapper.toDto(user));
+            return ResponseEntity.ok("");
         } catch (UserValidationException e) {
             log.error("User invalid", e);
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (UserNotFoundException e) {
             log.error("User not found", e);
             return ResponseEntity.notFound().build();

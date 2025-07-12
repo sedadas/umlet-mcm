@@ -58,7 +58,7 @@ export const getUsersById = async (id: String): Promise<NewUser> => {
  * @param newUser: the user to be created
  * @return the newly created user
  */
-export const createUser = async (newUser: NewUser): Promise<User> => {
+export const createUser = async (newUser: NewUser): Promise<String> => {
     try {
         const response = await apiClient.post('', newUser);
         return response.data;
@@ -73,9 +73,9 @@ export const createUser = async (newUser: NewUser): Promise<User> => {
  * @param user: the user to be updated
  * @return the updated created user
  */
-export const updateUser = async (user: NewUser): Promise<User> => {
+export const updateUser = async (user: NewUser): Promise<String> => {
     try {
-        const response = await apiClient.put(`/${user.username}`, user);
+        const response = await apiClient.put(``, user);
         return response.data;
     } catch (error) {
         throw error;

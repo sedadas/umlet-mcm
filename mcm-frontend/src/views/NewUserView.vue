@@ -13,6 +13,7 @@ const router = useRouter();
 
 
 
+const errors = ref<string | undefined>([]);
 const errorMessage = ref<string | undefined>(undefined);
 const newUser = ref<NewUser>({
   username: '',
@@ -42,11 +43,52 @@ const logout = () => {
 
 const createNewUser = async () => {
   try {
+    errors.value = [];
+
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const digitPattern = /\d/;
+    const lowercasePattern = /[a-z]/;
+    const uppercasePattern = /[A-Z]/;
+    const specialPattern = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
+    const whitePattern = /^\S+$/;
+    if (!newUser.value.username) {
+        errors.value.push('Email is required');
+    } else if (!emailPattern.test(newUser.value.username)) {
+        errors.value.push('Please enter a valid email.');
+    }
+
+    if (!digitPattern.test(newUser.value.password)) {
+        errors.value.push('Password requires at least one digit');
+    }
+    if (!lowercasePattern.test(newUser.value.password)) {
+        errors.value.push('Password requires at least one lowercase character');
+    }
+    if (!uppercasePattern.test(newUser.value.password)) {
+        errors.value.push('Password requires at least one uppercase character');
+    }
+    if (!specialPattern.test(newUser.value.password)) {
+        errors.value.push('Password requires at least one special character');
+    }
+    if (!whitePattern.test(newUser.value.password)) {
+        errors.value.push('No whitespaces allowed in the password');
+    }
+
+    if (newUser.value.password.length < 8) {
+        errors.value.push('Password is too short');
+    }
+
+    if(newUser.value.roles.length === 0){
+        errors.value.push('No roles selected');
+    }
+    if(errors.value.length != 0){
+        throw new Error(errors.value);
+    }
     await createUser(newUser.value);
     errorMessage.value = undefined
     router.push({ name: 'userManagement'})
   } catch (error: any) {
-    errorMessage.value = "Unable to create user: " + error.message
+    errorMessage.value = "Unable to create user: " + error.response.data;
   }
 };
 
