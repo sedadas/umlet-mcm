@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
 import static at.ac.tuwien.model.change.management.server.controller.Constants.USER_ENDPOINT;
 
@@ -26,8 +27,6 @@ import static at.ac.tuwien.model.change.management.server.controller.Constants.U
 @RequestMapping(USER_ENDPOINT)
 @RequiredArgsConstructor
 public class UserController {
-
-    private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
 
     private final UserDtoMapper userDtoMapper;
@@ -87,13 +86,13 @@ public class UserController {
      *         code 400 if the user already exists or validation failed
      */
     @PostMapping
-    public ResponseEntity<String> addUser(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> addUser(@RequestBody UserDTO userDTO) {
         try {
             var user = userService.createUser(userDtoMapper.fromDto(userDTO));
-            return ResponseEntity.ok("");
+            return ResponseEntity.ok(userDtoMapper.toDto(user));
         } catch (UserAlreadyExistsException | UserValidationException e) {
-            log.error("User invalid", e);
-            return ResponseEntity.badRequest().body(e.getMessage());
+            log.warn("User invalid: " + e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -105,13 +104,13 @@ public class UserController {
      *         code 404 if the user does not exist
      */
     @PutMapping
-    public ResponseEntity<String> updateUser(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> updateUser(@RequestBody UserDTO userDTO) {
         try {
             var user = userService.updateUser(userDtoMapper.fromDto(userDTO));
-            return ResponseEntity.ok("");
+            return ResponseEntity.ok(userDtoMapper.toDto(user));
         } catch (UserValidationException e) {
-            log.error("User invalid", e);
-            return ResponseEntity.badRequest().body(e.getMessage());
+            log.warn("User invalid: " + e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (UserNotFoundException e) {
             log.error("User not found", e);
             return ResponseEntity.notFound().build();

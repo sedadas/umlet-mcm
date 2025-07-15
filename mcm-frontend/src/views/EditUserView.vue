@@ -15,7 +15,6 @@ const route = useRoute();
 
 
 
-const errors = ref<string | undefined>([]);
 const errorMessage = ref<string | undefined>(undefined);
 let user = ref<NewUser>({
   username: '',
@@ -54,55 +53,11 @@ const fetchUser = async () => {
 
 const patchUser = async () => {
   try {
-
-    errors.value = [];
-
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const digitPattern = /\d/;
-    const lowercasePattern = /[a-z]/;
-    const uppercasePattern = /[A-Z]/;
-    const specialPattern = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
-    const whitePattern = /^\S+$/;
-    if (!user.value.username) {
-        errors.value.push('Email is required');
-    } else if (!emailPattern.test(user.value.username)) {
-        errors.value.push('Please enter a valid email.');
-    }
-
-    if (!digitPattern.test(user.value.password)) {
-        errors.value.push('Password requires at least one digit');
-    }
-    if (!lowercasePattern.test(user.value.password)) {
-        errors.value.push('Password requires at least one lowercase character');
-    }
-    if (!uppercasePattern.test(user.value.password)) {
-        errors.value.push('Password requires at least one uppercase character');
-    }
-    if (!specialPattern.test(user.value.password)) {
-        errors.value.push('Password requires at least one special character');
-    }
-    if (!whitePattern.test(user.value.password)) {
-        errors.value.push('No whitespaces allowed in the password');
-    }
-
-    if (user.value.password.length < 8) {
-        errors.value.push('Password is too short');
-    }
-
-    if(user.value.roles.length === 0){
-        errors.value.push('No roles selected');
-    }
-    if(errors.value.length != 0){
-        throw new Error(errors.value);
-    }
-
     await updateUser(user.value);
     fetchUser();
     errorMessage.value = undefined
   } catch (error: any) {
-    console.log(error);
-    errorMessage.value = "Unable to create user: " + error.message;
+    errorMessage.value = "Unable to update user: " + error.response.data.error;
   }
 };
 
@@ -155,7 +110,7 @@ onMounted(() => {
       <form @submit.prevent="patchUser">
         <div>
           <label>Email:</label>
-          <input v-model.trim="user.username" placeholder="Enter your email" type="email" required />
+          <input v-model.trim="user.username" placeholder="Enter your email" type="email" required disabled />
         </div>
         <div>
           <label>Password:</label>

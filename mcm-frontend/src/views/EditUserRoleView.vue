@@ -28,7 +28,7 @@ const updateNewUserRole = async () => {
     errorMessage.value = undefined
     router.push({ name: 'userRoleManagement'})
   } catch (error: any) {
-    errorMessage.value = "Unable to update role: " + error.message
+    errorMessage.value = "Unable to update user: " + error.response.data.error;
   }
 };
 
@@ -102,7 +102,7 @@ onMounted(() => {
       <form @submit.prevent="updateNewUserRole">
         <div>
           <label>Name:</label>
-          <input v-model.trim="newUserRole.name" placeholder="Enter Role Name" type="text" required />
+          <input v-model.trim="newUserRole.name" placeholder="Enter Role Name" type="text" required disabled />
         </div>
 
         <label>Permissions:</label>
