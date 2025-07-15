@@ -34,9 +34,9 @@ public class UserServiceTest {
     private UserServiceImpl userService;
 
     private User user;
-    
+
     private UserEntity userEntity;
-    
+
     @BeforeEach
     public void setup() {
         user = new User();

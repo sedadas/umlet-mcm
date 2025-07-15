@@ -53,10 +53,11 @@ const fetchUser = async () => {
 
 const patchUser = async () => {
   try {
-    user = await updateUser(user);
+    await updateUser(user.value);
+    fetchUser();
     errorMessage.value = undefined
   } catch (error: any) {
-    errorMessage.value = "Unable to update user: " + error.message
+    errorMessage.value = "Unable to update user: " + error.response.data.error;
   }
 };
 
@@ -109,7 +110,7 @@ onMounted(() => {
       <form @submit.prevent="patchUser">
         <div>
           <label>Email:</label>
-          <input v-model.trim="user.username" placeholder="Enter your email" type="email" required />
+          <input v-model.trim="user.username" placeholder="Enter your email" type="email" required disabled />
         </div>
         <div>
           <label>Password:</label>

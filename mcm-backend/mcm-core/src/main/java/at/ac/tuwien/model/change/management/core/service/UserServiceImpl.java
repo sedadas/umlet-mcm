@@ -112,7 +112,7 @@ public class UserServiceImpl implements UserService {
             return;
         }
         if(user.getPassword().isEmpty() || !user.getPassword().matches(pattern)) {
-            throw new UserValidationException("Password does not adhere to the password policy");
+            throw new UserValidationException("Password does not adhere to the password policy. It should be at least 8 characters and contain numbers, lowercase and uppercase letters and special characters like [!?@#$%^&+=_]");
         }
     }
 

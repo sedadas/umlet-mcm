@@ -46,7 +46,7 @@ const createNewUser = async () => {
     errorMessage.value = undefined
     router.push({ name: 'userManagement'})
   } catch (error: any) {
-    errorMessage.value = "Unable to create user: " + error.message
+    errorMessage.value = "Unable to create user: " + error.response.data.error;
   }
 };
 
