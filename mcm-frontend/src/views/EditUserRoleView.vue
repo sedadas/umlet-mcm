@@ -35,7 +35,7 @@ const updateNewUserRole = async () => {
     await updateRole(newUserRole.value);
     errorMessage.value = undefined;
     toast({
-      title: "Role created successfully.",
+      title: "Role updated successfully.",
       duration: 3000,
     });
     router.push({ name: "userRoleManagement" });
@@ -64,6 +64,10 @@ const removeRole = async (roleName: any) => {
     if (confirmed) {
       await deleteRole(roleName as string);
       errorMessage.value = undefined;
+      toast({
+        title: "Role deleted successfully.",
+        duration: 3000,
+      });
       router.push({ name: "userRoleManagement" });
     }
   } catch (error: any) {
@@ -123,7 +127,9 @@ onMounted(() => {
         >
           <ChevronLeft />
         </Button>
-        <h1 class="text-4xl font-semibold text-gray-800">Update Role</h1>
+        <h1 class="text-4xl font-semibold text-gray-800">
+          Edit User Role: {{ newUserRole.name }}
+        </h1>
       </div>
 
       <!-- <div class="flex justify-center p-2">
@@ -133,19 +139,6 @@ onMounted(() => {
       </div> -->
 
       <form @submit.prevent="updateNewUserRole">
-        <div
-          class="flex items-center justify-between my-6 border-y-1 border-gray-500"
-        >
-          <label>Name</label>
-          <Input
-            v-model.trim="newUserRole.name"
-            placeholder="Enter Role Name"
-            type="text"
-            required
-            class="w-[75%]"
-          />
-        </div>
-
         <div
           class="flex items-start justify-between my-6 border-y-1 border-gray-500"
         >

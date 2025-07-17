@@ -93,9 +93,10 @@ const removeUser = async (username: string) => {
     if (confirmed) {
       await deleteUser(username);
       toast({
-        title: "User updated successfully.",
+        title: "User deleted successfully.",
         duration: 3000,
       });
+      router.push({ name: "userManagement" });
     }
   } catch (error: any) {
     errorMessage.value = "Unable to delete user: " + error.message;
