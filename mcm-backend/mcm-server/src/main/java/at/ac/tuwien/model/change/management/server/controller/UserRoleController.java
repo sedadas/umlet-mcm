@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 import static at.ac.tuwien.model.change.management.server.controller.Constants.USER_ROLE_ENDPOINT;
 
@@ -61,13 +62,13 @@ public class UserRoleController {
      *         code 400 if the role already exists or validation failed
      */
     @PostMapping
-    public ResponseEntity<UserRoleDTO> addUserRole(@RequestBody UserRoleDTO userRoleDTO) {
+    public ResponseEntity<?> addUserRole(@RequestBody UserRoleDTO userRoleDTO) {
         try {
             var userRole = userRoleService.createUserRole(userRoleDtoMapper.fromDto(userRoleDTO));
             return ResponseEntity.ok(userRoleDtoMapper.toDto(userRole));
         } catch (UserRoleAlreadyExistsException | UserValidationException e) {
-            log.error("role invalid", e);
-            return ResponseEntity.badRequest().build();
+            log.warn("Role invalid: " + e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -78,13 +79,13 @@ public class UserRoleController {
      *         code 404 if the role does not exist
      */
     @PutMapping
-    public ResponseEntity<UserRoleDTO> updateUserRole(@RequestBody UserRoleDTO userRoleDTO) {
+    public ResponseEntity<?> updateUserRole(@RequestBody UserRoleDTO userRoleDTO) {
         try {
             var role = userRoleService.updateUserRole(userRoleDtoMapper.fromDto(userRoleDTO));
             return ResponseEntity.ok(userRoleDtoMapper.toDto(role));
         } catch (UserValidationException e) {
-            log.error("User invalid", e);
-            return ResponseEntity.badRequest().build();
+            log.warn("Role invalid: " + e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (UserRoleNotFoundException e) {
             log.error("User not found", e);
             return ResponseEntity.notFound().build();

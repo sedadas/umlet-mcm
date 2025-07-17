@@ -26,7 +26,7 @@ const createNewUserRole = async () => {
     errorMessage.value = undefined;
     router.push({ name: "userRoleManagement" });
   } catch (error: any) {
-    errorMessage.value = "Unable to create role: " + error.message;
+    errorMessage.value = "Unable to create role: " + error.response.data.error;
   }
 };
 

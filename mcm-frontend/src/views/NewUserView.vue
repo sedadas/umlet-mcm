@@ -51,7 +51,7 @@ const createNewUser = async () => {
         duration: 3000,
       });
     }
-    errorMessage.value = "Unable to create user: " + error.message;
+    errorMessage.value = "Unable to create user: " + error.response.data.error;
   }
 };
 

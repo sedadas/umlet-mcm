@@ -34,7 +34,7 @@ const updateNewUserRole = async () => {
     errorMessage.value = undefined;
     router.push({ name: "userRoleManagement" });
   } catch (error: any) {
-    errorMessage.value = "Unable to update role: " + error.message;
+    errorMessage.value = "Unable to update user: " + error.response.data.error;
   }
 };
 
@@ -114,6 +114,7 @@ onMounted(() => {
       </div> -->
 
       <form @submit.prevent="updateNewUserRole">
+
         <div
           class="flex items-center justify-between my-6 border-y-1 border-gray-500"
         >

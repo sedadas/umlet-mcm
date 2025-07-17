@@ -73,6 +73,8 @@ const patchUser = async () => {
         title: "Password is not strong enough.",
         duration: 3000,
       });
+      errorMessage.value =
+        "Unable to update user: " + error.response.data.error;
     }
 
     errorMessage.value = "Unable to update user: " + error.message;

@@ -73,7 +73,6 @@ export const updateUser = async (user: NewUser): Promise<NewUser> => {
   }
   try {
     const response = await apiClient.put("", user);
-    console.log("User updated:", response.data);
     return response.data;
   } catch (error) {
     throw error;
@@ -87,7 +86,6 @@ export const updateUser = async (user: NewUser): Promise<NewUser> => {
 export const deleteUser = async (id: String): Promise<void> => {
   try {
     const response = await apiClient.delete(`/${id}`);
-    return null;
   } catch (error) {
     throw error;
   }

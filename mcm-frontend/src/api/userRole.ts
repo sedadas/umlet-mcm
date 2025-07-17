@@ -60,7 +60,7 @@ export const getUserRolesById = async (id: String): Promise<NewUser> => {
  * @param role: the role to be created
  * @return the newly created role
  */
-export const createRole = async (role: UserRole): Promise<UserRole> => {
+export const createRole = async (role: UserRole): Promise<String> => {
     try {
         role.permissions = role.permissions.filter(perms => perms !== "");
         const response = await apiClient.post('', role);
@@ -76,7 +76,7 @@ export const createRole = async (role: UserRole): Promise<UserRole> => {
  * @param role: the role to be updated
  * @return the updated role
  */
-export const updateRole = async (role: UserRole): Promise<UserRole> => {
+export const updateRole = async (role: UserRole): Promise<String> => {
     try {
         role.permissions = role.permissions.filter(perms => perms !== "");
         const response = await apiClient.put('', role);
