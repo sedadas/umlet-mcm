@@ -81,6 +81,9 @@ public class UserRoleServiceImpl implements UserRoleService {
         if(!userRoleRepository.existsById(name)) {
             throw new UserRoleNotFoundException("Role %s not found".formatted(name));
         }
+        if(name.equals("admin")) {
+            throw new IllegalArgumentException("Cannot delete admin role");
+        }
         userRoleRepository.deleteById(name);
     }
 }

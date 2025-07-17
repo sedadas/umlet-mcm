@@ -87,7 +87,7 @@ public class UserRoleController {
             log.warn("Role invalid: " + e.getMessage());
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (UserRoleNotFoundException e) {
-            log.error("User not found", e);
+            log.error("Role not found", e);
             return ResponseEntity.notFound().build();
         }
     }
@@ -96,16 +96,20 @@ public class UserRoleController {
      * Delete an existing role
      * @param name role to delete
      * @return code 204 if successful
+     *         code 400 if admin
      *         code 404 if not found
      */
     @DeleteMapping("/{name}")
-    public ResponseEntity<Void> deleteUserRole(@PathVariable String name) {
+    public ResponseEntity<?> deleteUserRole(@PathVariable String name) {
         try {
             userRoleService.deleteUserRole(name);
             return ResponseEntity.noContent().build();
         } catch (UserRoleNotFoundException e) {
             log.error("Role not found", e);
             return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            log.warn("Role deletion request invalid: " + e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 }
