@@ -2,6 +2,7 @@
 import { deleteRole, getUserRolesById, updateRole } from "@/api/userRole.ts";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input/Input.vue";
+import { useToast } from "@/components/ui/toast/use-toast";
 import type { UserRole } from "@/types/User";
 import {
   ChevronLeft,
@@ -14,6 +15,7 @@ import { onMounted, ref } from "vue";
 import Multiselect from "vue-multiselect";
 import { useRoute, useRouter } from "vue-router";
 
+const { toast } = useToast();
 const router = useRouter();
 const route = useRoute();
 
@@ -32,9 +34,17 @@ const updateNewUserRole = async () => {
   try {
     await updateRole(newUserRole.value);
     errorMessage.value = undefined;
+    toast({
+      title: "Role created successfully.",
+      duration: 3000,
+    });
     router.push({ name: "userRoleManagement" });
   } catch (error: any) {
-    errorMessage.value = "Unable to update user: " + error.response.data.error;
+    toast({
+      title: error.response.data.error,
+      duration: 3000,
+    });
+    errorMessage.value = "Unable to update role: " + error.response.data.error;
   }
 };
 
@@ -44,6 +54,7 @@ const fetchUserRole = async () => {
     errorMessage.value = undefined;
   } catch (error: any) {
     errorMessage.value = "Unable to fetch role: " + error.message;
+    console.log(error);
   }
 };
 
@@ -114,7 +125,6 @@ onMounted(() => {
       </div> -->
 
       <form @submit.prevent="updateNewUserRole">
-
         <div
           class="flex items-center justify-between my-6 border-y-1 border-gray-500"
         >
@@ -152,11 +162,11 @@ onMounted(() => {
                 <Trash />
               </Button>
             </div>
-            <p class="text-sm cursor-pointer inline" @click="addPermission()">
+            <div class="text-sm cursor-pointer inline" @click="addPermission()">
               <div class="flex items-center gap-2">
-              <SquarePlus /> Add Permission
+                <SquarePlus /> Add PermAission
               </div>
-            </p>
+            </div>
           </div>
         </div>
         <div class="flex justify-end gap-2">

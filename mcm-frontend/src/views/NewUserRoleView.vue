@@ -2,13 +2,15 @@
 import { createRole, getAllUserRoles } from "@/api/userRole.ts";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input/Input.vue";
+import { useToast } from "@/components/ui/toast/use-toast";
 import type { UserRole } from "@/types/User";
 import { ChevronLeft, HelpCircle, Trash, User } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import Multiselect from "vue-multiselect";
 import { useRouter } from "vue-router";
-const router = useRouter();
 
+const router = useRouter();
+const { toast } = useToast();
 const errorMessage = ref<string | undefined>(undefined);
 const newUserRole = ref<UserRole>({
   name: "",
@@ -24,8 +26,16 @@ const createNewUserRole = async () => {
   try {
     await createRole(newUserRole.value);
     errorMessage.value = undefined;
+    toast({
+      title: "Role created successfully.",
+      duration: 3000,
+    });
     router.push({ name: "userRoleManagement" });
   } catch (error: any) {
+    toast({
+      title: error.response.data.error,
+      duration: 3000,
+    });
     errorMessage.value = "Unable to create role: " + error.response.data.error;
   }
 };

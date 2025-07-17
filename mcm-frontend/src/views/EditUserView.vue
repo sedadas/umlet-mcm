@@ -67,16 +67,12 @@ const patchUser = async () => {
       title: "User updated successfully.",
       duration: 3000,
     });
+    router.push({ name: "userManagement" });
   } catch (error: any) {
-    if (error.status === 400) {
-      toast({
-        title: "Password is not strong enough.",
-        duration: 3000,
-      });
-      errorMessage.value =
-        "Unable to update user: " + error.response.data.error;
-    }
-
+    toast({
+      title: error.response.data.error,
+      duration: 3000,
+    });
     errorMessage.value = "Unable to update user: " + error.message;
   }
 };

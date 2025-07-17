@@ -43,11 +43,15 @@ const createNewUser = async () => {
   try {
     await createUser(newUser.value);
     errorMessage.value = undefined;
+    toast({
+      title: "User created successfully.",
+      duration: 3000,
+    });
     router.push({ name: "userManagement" });
   } catch (error: any) {
     if (error.status === 400) {
       toast({
-        title: "Password is not strong enough.",
+        title: error.response.data.error,
         duration: 3000,
       });
     }
