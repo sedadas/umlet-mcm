@@ -67,7 +67,15 @@ const removeRole = async (roleName: any) => {
       router.push({ name: "userRoleManagement" });
     }
   } catch (error: any) {
-    errorMessage.value = "Unable to delete role: " + error.message;
+    if('response' in error) {
+      toast({
+        title: error.response.data.error,
+        duration: 3000,
+      });
+    }
+    else {
+      errorMessage.value = "Unable to delete role: " + error.message;
+    }
   }
 };
 
