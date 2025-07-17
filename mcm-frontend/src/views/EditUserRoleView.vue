@@ -3,7 +3,13 @@ import { deleteRole, getUserRolesById, updateRole } from "@/api/userRole.ts";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input/Input.vue";
 import type { UserRole } from "@/types/User";
-import { ChevronLeft, HelpCircle, Trash, User } from "lucide-vue-next";
+import {
+  ChevronLeft,
+  HelpCircle,
+  SquarePlus,
+  Trash,
+  User,
+} from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import Multiselect from "vue-multiselect";
 import { useRoute, useRouter } from "vue-router";
@@ -146,7 +152,9 @@ onMounted(() => {
               </Button>
             </div>
             <p class="text-sm cursor-pointer inline" @click="addPermission()">
-              Add Permission
+              <div class="flex items-center gap-2">
+              <SquarePlus /> Add Permission
+              </div>
             </p>
           </div>
         </div>

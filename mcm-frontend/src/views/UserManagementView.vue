@@ -2,6 +2,7 @@
 import { getAllUsers } from "@/api/user.ts";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/components/ui/toast/use-toast";
 import UserView from "@/components/user-management/UserView.vue";
 import type { User } from "@/types/User";
 import axios from "axios";
@@ -13,6 +14,7 @@ const router = useRouter();
 // variables
 const errorMessage = ref<string | undefined>(undefined);
 const users = ref<User[]>([]);
+const { toast } = useToast();
 
 // functions
 /**
@@ -57,10 +59,6 @@ onMounted(() => {
     >
       <div class="flex items-center justify-between mb-4">
         <h1 class="text-4xl font-semibold text-gray-800">User Management</h1>
-        <Button @click="$router.push({ name: 'newUser' })" j variant="outline">
-          <UserPlus />
-          Add User
-        </Button>
       </div>
       <!-- <div class="flex justify-center p-2">
         <label v-if="errorMessage" class="text-sm font-medium text-red-500">{{errorMessage}}</label>
@@ -76,6 +74,17 @@ onMounted(() => {
             "
           />
         </ScrollArea>
+
+        <div class="flex justify-end">
+          <Button
+            @click="$router.push({ name: 'newUser' })"
+            variant="outline"
+            class="bg-green-500 text-white hover:bg-green-600 hover:text-white"
+          >
+            <UserPlus />
+            Add User
+          </Button>
+        </div>
       </div>
     </div>
 

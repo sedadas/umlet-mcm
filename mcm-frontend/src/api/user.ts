@@ -68,14 +68,14 @@ export const createUser = async (newUser: NewUser): Promise<User> => {
  * @return the updated created user
  */
 export const updateUser = async (user: NewUser): Promise<NewUser> => {
-  console.log("here " + JSON.stringify(user));
+  if (user.password === "") {
+    delete user.password; // Remove password if it's empty such that it does not get updated
+  }
   try {
     const response = await apiClient.put("", user);
-    console.log("Here2");
     console.log("User updated:", response.data);
     return response.data;
   } catch (error) {
-    console.log("Here3");
     throw error;
   }
 };

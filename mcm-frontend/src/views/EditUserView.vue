@@ -3,6 +3,7 @@ import { deleteUser, getUsersById, updateUser } from "@/api/user.ts";
 import { getAllUserRoles } from "@/api/userRole.ts";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input/Input.vue";
+import { useToast } from "@/components/ui/toast/use-toast";
 import type { NewUser, UserRole } from "@/types/User";
 import {
   ChevronLeft,
@@ -15,6 +16,7 @@ import { onMounted, ref } from "vue";
 import Multiselect from "vue-multiselect";
 import { useRoute, useRouter } from "vue-router";
 
+const { toast } = useToast();
 const router = useRouter();
 const route = useRoute();
 
@@ -49,8 +51,7 @@ const logout = () => {
 const fetchUser = async () => {
   try {
     user.value = await getUsersById(route.params.id as string);
-    //TODO convert PW into string
-    // user.value.password = useBase64(user.value.password);
+    user.value.password = ""; // Do not show password in the form
     errorMessage.value = undefined;
   } catch (error: any) {
     errorMessage.value = "Unable to fetch: " + error.message;
@@ -60,19 +61,43 @@ const fetchUser = async () => {
 const patchUser = async () => {
   try {
     user.value = await updateUser(user.value);
+    user.value.password = ""; // Do not show password in the form
     errorMessage.value = undefined;
+    toast({
+      title: "User updated successfully.",
+      duration: 3000,
+    });
   } catch (error: any) {
+    if (error.status === 400) {
+      toast({
+        title: "Password is not strong enough.",
+        duration: 3000,
+      });
+    }
+
     errorMessage.value = "Unable to update user: " + error.message;
   }
 };
 
 const removeUser = async (username: string) => {
+  if (username === localStorage.getItem("currentUser")) {
+    console.error("Cannot delete logged in user.");
+    errorMessage.value = "You cannot delete logged in user.";
+    toast({
+      title: errorMessage.value,
+      duration: 3000,
+    });
+    return;
+  }
+
   try {
     const confirmed = confirm("Are you sure?");
     if (confirmed) {
       await deleteUser(username);
-      errorMessage.value = undefined;
-      router.push({ name: "userManagement" });
+      toast({
+        title: "User updated successfully.",
+        duration: 3000,
+      });
     }
   } catch (error: any) {
     errorMessage.value = "Unable to delete user: " + error.message;
@@ -108,20 +133,22 @@ onMounted(() => {
         >
           <ChevronLeft />
         </Button>
-        <h1 class="text-4xl font-semibold text-gray-800">Edit User</h1>
+        <h1 class="text-4xl font-semibold text-gray-800">
+          Edit User: {{ user.username }}
+        </h1>
       </div>
 
-      <div class="flex justify-center p-2">
+      <!-- <div class="flex justify-center p-2">
         <label v-if="errorMessage" class="text-sm font-medium text-red-500">{{
           errorMessage
         }}</label>
         <label v-else class="text-sm font-medium text-green-500"
           >Database connection OK</label
         >
-      </div>
+      </div> -->
 
       <form @submit.prevent="patchUser">
-        <div
+        <!-- <div
           class="flex items-center justify-between my-6 border-y-1 border-gray-500"
         >
           <label>Username</label>
@@ -132,16 +159,15 @@ onMounted(() => {
             required
             class="w-[75%]"
           />
-        </div>
+        </div> -->
         <div
           class="flex items-center justify-between my-6 border-y-1 border-gray-500"
         >
           <label>Password</label>
           <Input
             v-model.trim="user.password"
-            placeholder="Enter your password"
+            placeholder="Enter new password"
             type="password"
-            required
             class="w-[75%]"
           />
           <!-- TODO Check for PW strength -->
@@ -182,7 +208,8 @@ onMounted(() => {
         <div class="flex mt-6 gap-4 justify-end">
           <Button
             @click="removeUser(user.username)"
-            class="flex items-center gap-2 bg-red-600 text-white"
+            type="button"
+            class="flex items-center gap-2 bg-red-600 text-white hover:bg-red-700 hover:text-white"
             variant="outline"
           >
             <UserMinus />

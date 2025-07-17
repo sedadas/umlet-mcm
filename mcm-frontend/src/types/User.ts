@@ -13,7 +13,7 @@ export type User = {
 
 export type NewUser = {
   username: string;
-  password: string;
+  password?: string;
   roles: UserRole[];
   privateDashboards?: QueryDashboard[];
 };

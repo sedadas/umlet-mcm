@@ -1,10 +1,15 @@
 <script>
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input/Input.vue";
+import { useToast } from "@/components/ui/toast/use-toast";
 import { AppConfig } from "@/config";
 import axios from "axios";
 
 export default {
+  setup() {
+    const { toast } = useToast();
+    return { toast };
+  },
   components: {
     Button,
     Input,
@@ -32,10 +37,17 @@ export default {
         .then((response) => {
           // Save token
           document.cookie = `authHeader=Basic ${token}; SameSite=Strict; path=/; max-age=86400`;
+          localStorage.setItem("currentUser", this.email);
           this.$router.push("/");
         })
         .catch((error) => {
           console.error("Auth failed:", error);
+          if (error.status === 401) {
+            this.toast({
+              title: "Either email or password is incorrect.",
+              duration: 3000,
+            });
+          }
         });
     },
   },
