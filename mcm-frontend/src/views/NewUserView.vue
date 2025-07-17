@@ -3,13 +3,14 @@ import { createUser } from "@/api/user.ts";
 import { getAllUserRoles } from "@/api/userRole.ts";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input/Input.vue";
+import { useToast } from "@/components/ui/toast/use-toast";
 import type { NewUser, UserRole } from "@/types/User";
 import { ChevronLeft, HelpCircle, User as UserIcon } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import Multiselect from "vue-multiselect";
 import { useRouter } from "vue-router";
-const router = useRouter();
 
+const router = useRouter();
 const errorMessage = ref<string | undefined>(undefined);
 const newUser = ref<NewUser>({
   username: "",
@@ -17,7 +18,7 @@ const newUser = ref<NewUser>({
   roles: [],
 });
 const userRoles = ref<UserRole[]>([]);
-
+const { toast } = useToast();
 // functions
 /**
  * Fetch all user Roles
@@ -44,6 +45,12 @@ const createNewUser = async () => {
     errorMessage.value = undefined;
     router.push({ name: "userManagement" });
   } catch (error: any) {
+    if (error.status === 400) {
+      toast({
+        title: "Password is not strong enough.",
+        duration: 3000,
+      });
+    }
     errorMessage.value = "Unable to create user: " + error.message;
   }
 };
